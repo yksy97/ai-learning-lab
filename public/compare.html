@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GAN Visualizer · 比較</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='11' cy='16' r='7' fill='%23d95926'/%3E%3Ccircle cx='21' cy='16' r='7' fill='%23199e70' fill-opacity='.85'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="top">
+    <div>
+      <h1>GAN Visualizer</h1>
+      <nav class="tabs" aria-label="モード">
+        <a href="index.html">GAN</a>
+        <a href="ar.html">自己回帰 Transformer</a>
+        <a href="compare.html" aria-current="page">比較</a>
+      </nav>
+      <p class="sub">同じ分布を、GAN と自己回帰 Transformer に同じステップ数だけ学習させて並べる</p>
+    </div>
+    <div class="transport">
+      <button id="btnPlay" class="primary" title="再生 / 一時停止（Space）">▶ 学習開始</button>
+      <button id="btnStep" title="1ステップ進める（S）">1ステップ</button>
+      <button id="btnReset" title="重みを初期化（R）">リセット</button>
+    </div>
+  </header>
+
+  <main class="compare">
+    <aside class="panel controls">
+      <section>
+        <h2>データ</h2>
+        <label class="field">本物の分布
+          <select id="dataset"></select>
+        </label>
+        <p id="datasetNote" class="note"></p>
+      </section>
+      <section>
+        <h2>学習</h2>
+        <label class="field">速度（1フレームあたりのステップ数） <output id="speedOut"></output>
+          <input type="range" id="speed" min="1" max="10" step="1" value="3" />
+        </label>
+        <p class="note">両方とも同じ回数だけパラメータを更新する（バッチサイズも同じ 64）。</p>
+        <label class="field">乱数シード <span class="hint">変更するとリセット</span>
+          <input type="number" id="seed" min="1" max="9999" step="1" />
+        </label>
+      </section>
+      <section>
+        <h2>GAN</h2>
+        <label class="field">損失関数
+          <select id="ganLoss">
+            <option value="nonsat">非飽和（標準）</option>
+            <option value="minimax">ミニマックス（原論文）</option>
+          </select>
+        </label>
+        <label class="field">G の学習率 <output id="ganLrOut"></output>
+          <input type="range" id="ganLr" min="0" max="6" step="1" />
+        </label>
+        <p class="note">学習率を 0.005 以上にするとモード崩壊を起こしやすい。</p>
+      </section>
+      <section>
+        <h2>自己回帰 Transformer</h2>
+        <label class="field">学習率 <output id="arLrOut"></output>
+          <input type="range" id="arLr" min="0" max="5" step="1" />
+        </label>
+      </section>
+      <section>
+        <h2>表示</h2>
+        <label class="check"><input type="checkbox" id="showBg" checked /> 背景（D の判定 / p(x)）</label>
+        <label class="check"><input type="checkbox" id="showReal" checked /> 本物のサンプル</label>
+      </section>
+    </aside>
+
+    <section class="panel stage">
+      <div class="stage-head">
+        <h2>GAN <span class="hint">ノイズを連続に変形して近づける</span></h2>
+        <div class="legend"><span><i class="dot real"></i>本物</span><span><i class="dot fake"></i>生成</span></div>
+      </div>
+      <div class="canvas-wrap square"><canvas id="ganCanvas" aria-label="GAN の生成結果"></canvas></div>
+      <div class="metrics">
+        <div class="stat"><span>品質（precision）</span><b id="ganP">–</b></div>
+        <div class="stat"><span>網羅性（recall）</span><b id="ganR">–</b></div>
+        <div class="stat"><span>覆えている山</span><b id="ganM">–</b></div>
+      </div>
+    </section>
+
+    <section class="panel stage">
+      <div class="stage-head">
+        <h2>自己回帰 Transformer <span class="hint">マスごとに確率を割り当てる</span></h2>
+        <div class="legend"><span><i class="dot real"></i>本物</span><span><i class="dot ar"></i>生成</span></div>
+      </div>
+      <div class="canvas-wrap square"><canvas id="arCanvas" aria-label="自己回帰 Transformer の生成結果"></canvas></div>
+      <div class="metrics">
+        <div class="stat"><span>品質（precision）</span><b id="arP">–</b></div>
+        <div class="stat"><span>網羅性（recall）</span><b id="arR">–</b></div>
+        <div class="stat"><span>覆えている山</span><b id="arM">–</b></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="charts2">
+    <div class="panel">
+      <div class="chart-head">
+        <h2>品質（precision）<span class="hint">生成点のうち本物の近くに落ちた割合</span></h2>
+        <div class="legend"><span><i class="line fake"></i>GAN</span><span><i class="line ar"></i>Transformer</span></div>
+      </div>
+      <div class="canvas-wrap chart"><canvas id="chartP" aria-label="品質の推移"></canvas><div class="tip" hidden></div></div>
+    </div>
+    <div class="panel">
+      <div class="chart-head">
+        <h2>網羅性（recall）<span class="hint">本物のうち生成点が近くにある割合</span></h2>
+        <div class="legend"><span><i class="line fake"></i>GAN</span><span><i class="line ar"></i>Transformer</span></div>
+      </div>
+      <div class="canvas-wrap chart"><canvas id="chartR" aria-label="網羅性の推移"></canvas><div class="tip" hidden></div></div>
+    </div>
+  </div>
+
+  <section class="panel guide">
+    <h2>比較のポイント</h2>
+    <div class="guide-grid">
+      <div>
+        <h3>品質と網羅性</h3>
+        <p>品質が高い＝変な場所に点を置かない。網羅性が高い＝本物の分布の隅々まで生成できる。生成モデルの評価では、この2つを分けて見るのが基本。ただし点を広くばらまくと網羅性だけ高く出るので、「覆えている山」と合わせて見る。</p>
+      </div>
+      <div>
+        <h3>GAN：山と山のあいだに橋ができる</h3>
+        <p>G は連続な関数なので、1枚のゴムシートを離れた山に分けて置けない。山と山をつなぐ細い「橋」に点が残り、品質が下がる。学習が不安定なので、山を取りこぼして網羅性が揺れることも多い。</p>
+      </div>
+      <div>
+        <h3>Transformer：尤度で全体を覆う</h3>
+        <p>本物のどの点にも確率を割り当てないと NLL が大きくなるので、山を取りこぼしにくい。空間を 64×64 のマスに区切っているので、離れた山を別々に扱うのも得意。</p>
+      </div>
+      <div>
+        <h3>公平さについての注意</h3>
+        <p>2次元は自己回帰モデルに有利な舞台（全 4096 マスを数え上げられる、いわば賢いヒストグラム）。画像のような高次元では、GAN のシャープさが強みだった時代がある。GAN の G 学習率を上げると、モード崩壊で「覆えている山」の差が広がる様子も見られる。</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">キー操作：Space 再生/停止 ・ S 1ステップ ・ R リセット　|　指標：Kynkäänniemi et al. (2019) の改良版 Precision / Recall（k = 3）</footer>
+
+  <script type="module" src="js/compare-main.js"></script>
+</body>
+</html>

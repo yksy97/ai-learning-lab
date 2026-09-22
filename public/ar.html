@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GAN Visualizer · 自己回帰 Transformer</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='11' cy='16' r='7' fill='%233987e5'/%3E%3Ccircle cx='21' cy='16' r='7' fill='%23199e70' fill-opacity='.85'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="top">
+    <div>
+      <h1>GAN Visualizer</h1>
+      <nav class="tabs" aria-label="モード">
+        <a href="index.html">GAN</a>
+        <a href="ar.html" aria-current="page">自己回帰 Transformer</a>
+        <a href="compare.html">比較</a>
+      </nav>
+      <p class="sub">点をトークン列に変え、Transformer が「次のトークン」を1つずつ予測して p(x) を学ぶ。相手（Discriminator）はいない</p>
+    </div>
+    <div class="transport">
+      <button id="btnPlay" class="primary" title="再生 / 一時停止（Space）">▶ 学習開始</button>
+      <button id="btnStep" title="1ステップ進める（S）">1ステップ</button>
+      <button id="btnReset" title="重みを初期化（R）">リセット</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="panel controls">
+      <section>
+        <h2>データ</h2>
+        <label class="field">本物の分布
+          <select id="dataset"></select>
+        </label>
+        <p id="datasetNote" class="note"></p>
+      </section>
+
+      <section>
+        <h2>トークン化 <span class="hint">変更するとリセット</span></h2>
+        <label class="field">トークンの順序
+          <select id="order"></select>
+        </label>
+        <p class="note">各軸を 64 段階に区切り、「粗い位置（8択）」と「細かい位置（8択）」の2トークンで表す。1点 = 4トークン、語彙は 8。</p>
+      </section>
+
+      <section>
+        <h2>学習</h2>
+        <label class="field">学習率 <output id="lrOut"></output>
+          <input type="range" id="lr" min="0" max="5" step="1" />
+        </label>
+        <label class="field">バッチサイズ
+          <select id="batch"><option>32</option><option>64</option><option>128</option></select>
+        </label>
+        <label class="field">速度（1フレームあたりのステップ数） <output id="speedOut"></output>
+          <input type="range" id="speed" min="1" max="20" step="1" value="4" />
+        </label>
+      </section>
+
+      <section>
+        <h2>ネットワーク <span class="hint">変更するとリセット</span></h2>
+        <label class="field">埋め込み次元 d
+          <select id="d"><option>16</option><option>32</option><option>48</option></select>
+        </label>
+        <label class="field">ヘッド数
+          <select id="heads"><option>1</option><option>2</option><option>4</option></select>
+        </label>
+        <label class="field">層の数 <output id="layersOut"></output>
+          <input type="range" id="layers" min="1" max="3" step="1" />
+        </label>
+        <label class="field">乱数シード
+          <input type="number" id="seed" min="1" max="9999" step="1" />
+        </label>
+        <p class="note" id="paramCount"></p>
+      </section>
+
+      <section>
+        <h2>表示</h2>
+        <label class="check"><input type="checkbox" id="showDensity" checked /> 学習した確率 p(x)（背景）</label>
+        <label class="check"><input type="checkbox" id="showReal" /> 本物のサンプル</label>
+        <label class="check"><input type="checkbox" id="showSamples" checked /> 生成サンプル</label>
+        <label class="check"><input type="checkbox" id="showGrid" /> 8×8 の粗いマス目</label>
+      </section>
+    </aside>
+
+    <section class="panel stage">
+      <div class="stage-head">
+        <h2>データ空間 <span class="hint">クリックでその点の確率の内訳を表示</span></h2>
+        <div class="legend">
+          <span><i class="dot real"></i>本物</span>
+          <span><i class="dot ar"></i>生成（祖先サンプリング）</span>
+          <span class="ramp gray"><i class="bar"></i><em>p(x) 低</em><em>高（対数）</em></span>
+        </div>
+      </div>
+      <div class="canvas-wrap square">
+        <canvas id="main" aria-label="データ空間と学習した確率密度"></canvas>
+        <div id="mainTip" class="tip" hidden></div>
+      </div>
+    </section>
+
+    <section class="side">
+      <div class="panel stats">
+        <div class="stat"><span>ステップ</span><b id="stStep">0</b></div>
+        <div class="stat"><span>速度</span><b id="stRate">–</b></div>
+        <div class="stat"><span>NLL</span><b id="stNll">–</b></div>
+        <div class="stat"><span>下限</span><b id="stH">–</b></div>
+      </div>
+
+      <div class="panel">
+        <h2>1点ずつ生成する <span class="hint">p(x) = p(t₁)·p(t₂|t₁)·p(t₃|t₁,t₂)·p(t₄|t₁,t₂,t₃)</span></h2>
+        <div class="gen-actions">
+          <button id="genPlay">▶ 1点を生成</button>
+          <button id="genNext">次のトークン</button>
+          <button id="genClear">クリア</button>
+        </div>
+        <div class="gen-rows" id="genRows"></div>
+        <div class="formula" id="formula"></div>
+      </div>
+
+      <div class="panel">
+        <h2>アテンション <span class="hint">行 = 予測する位置、列 = 参照する入力</span></h2>
+        <div class="attn" id="attn"></div>
+        <p class="note">t₁〜t₄ は上の「1点ずつ生成する」の各トークン。位置 k は自分より前のトークンしか見られない（因果マスク）ので、右上は空白になる。数字は注意の重み（%）。</p>
+      </div>
+
+      <div class="panel">
+        <div class="chart-head">
+          <h2>負の対数尤度（1点あたり・nats）</h2>
+          <div class="legend"><span><i class="line ar"></i>学習データ</span></div>
+        </div>
+        <div class="canvas-wrap chart"><canvas id="chartNll" aria-label="負の対数尤度の推移"></canvas><div class="tip" hidden></div></div>
+        <p class="note">点線は本物の分布のエントロピー（どんなモデルでもこれより下がらない下限）。</p>
+      </div>
+    </section>
+  </main>
+
+  <section class="panel guide">
+    <h2>GAN との違い</h2>
+    <div class="guide-grid">
+      <div>
+        <h3>確率そのものを学ぶ</h3>
+        <p>GAN の背景は「D の判定」だったが、ここでは背景が p(x) そのもの。どの場所がどれだけありそうかを、モデルが数値で答えられる。</p>
+      </div>
+      <div>
+        <h3>1トークンずつ決める</h3>
+        <p>「1点を生成」を押すと、まず大まかな位置の候補 8 本から1本を確率で選び、次に範囲を絞り…と 4 回くり返す。大規模言語モデルが文章を1語ずつ生成するのと同じ仕組み。</p>
+      </div>
+      <div>
+        <h3>取りこぼさない</h3>
+        <p>尤度で学ぶので、山を1つでも無視すると大きな罰を受ける。そのためモード崩壊は起きにくい。代わりに山と山の間にも薄く確率が漏れやすい。</p>
+      </div>
+      <div>
+        <h3>アメーバは動かない</h3>
+        <p>連続な変形ではなく、毎回確率から引き直す。点が「移動」するのではなく、背景の確率の地図がだんだんくっきりしていく。</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">キー操作：Space 再生/停止 ・ S 1ステップ ・ R リセット ・ G 1点を生成　|　Transformer も素の JavaScript で実装（外部ライブラリなし）</footer>
+
+  <script type="module" src="js/ar-main.js"></script>
+</body>
+</html>

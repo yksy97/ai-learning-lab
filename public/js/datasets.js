@@ -12,6 +12,7 @@ export const DATASETS = {
   },
   ring8: {
     label: '円周上の8つのガウス',
+    modes: { centers: Array.from({ length: 8 }, (_, k) => [1.4 * Math.cos((k / 8) * Math.PI * 2), 1.4 * Math.sin((k / 8) * Math.PI * 2)]), radius: 0.25 },
     note: 'モード崩壊の定番例。G が一部の山だけを行き来することがある。',
     sample(r) {
       const k = Math.floor(r() * 8);
@@ -21,6 +22,7 @@ export const DATASETS = {
   },
   grid25: {
     label: '5×5 格子のガウス',
+    modes: { centers: Array.from({ length: 25 }, (_, k) => [(Math.floor(k / 5) - 2) * 0.7, ((k % 5) - 2) * 0.7]), radius: 0.15 },
     note: '25 個の山。すべてのモードを覆えるかが試される難しめの課題。',
     sample(r) {
       const i = Math.floor(r() * 5) - 2, j = Math.floor(r() * 5) - 2;

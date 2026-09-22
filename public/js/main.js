@@ -3,6 +3,7 @@ import { GAN, DEFAULTS } from './gan.js';
 import { DATASETS } from './datasets.js';
 import { mulberry32, gaussian } from './nn.js';
 import { SpaceView, LineChart, drawLatent, zColor } from './viz.js';
+import { History, initialDataset, syncDataset, fillDatasetSelect } from './common.js';
 
 const $ = (id) => document.getElementById(id);
 const LR_STEPS = [0.0001, 0.0003, 0.0005, 0.001, 0.002, 0.005, 0.01];
@@ -10,35 +11,9 @@ const N_VIEW = 500;       // 表示用サンプル数
 const GRID_MAX = 2.5;     // 潜在空間の格子の範囲
 const GRID_VALS = Array.from({ length: 11 }, (_, i) => -GRID_MAX + i * 0.5);
 
-// ---- 履歴（長時間学習しても点数が増えすぎないよう間引き平均） ----
-class History {
-  constructor() { this.points = []; this.every = 1; this.acc = null; this.cnt = 0; }
-  push(r) {
-    if (!this.acc) this.acc = { lossD: 0, lossG: 0, dReal: 0, dFake: 0 };
-    for (const k in this.acc) this.acc[k] += r[k];
-    this.cnt++;
-    if (this.cnt >= this.every) {
-      const p = { step: r.step };
-      for (const k in this.acc) p[k] = this.acc[k] / this.cnt;
-      this.points.push(p);
-      this.acc = null; this.cnt = 0;
-      if (this.points.length > 600) {
-        const merged = [];
-        for (let i = 0; i + 1 < this.points.length; i += 2) {
-          const a = this.points[i], b = this.points[i + 1], m = { step: b.step };
-          for (const k of ['lossD', 'lossG', 'dReal', 'dFake']) m[k] = (a[k] + b[k]) / 2;
-          merged.push(m);
-        }
-        this.points = merged;
-        this.every *= 2;
-      }
-    }
-  }
-}
-
 // ---- 状態 ----
 const state = {
-  cfg: { ...DEFAULTS },
+  cfg: { ...DEFAULTS, dataset: initialDataset(DEFAULTS.dataset) },
   running: false,
   speed: 8,
   show: {},
@@ -51,7 +26,7 @@ let gan, hist, viewZ, jitter, fakeColors, realView;
 
 function reset() {
   gan = new GAN(state.cfg);
-  hist = new History();
+  hist = new History(['lossD', 'lossG', 'dReal', 'dFake']);
   const r = mulberry32(state.cfg.seed * 31 + 5);
   const d = state.cfg.noiseDim;
   viewZ = new Float64Array(N_VIEW * d);
@@ -194,12 +169,12 @@ function bindRange(id, outId, get, set, fmt = String) {
 
 function init() {
   const dsSel = $('dataset');
-  for (const [k, v] of Object.entries(DATASETS)) dsSel.add(new Option(v.label, k));
-  dsSel.value = state.cfg.dataset;
-  $('datasetNote').textContent = DATASETS[state.cfg.dataset].note;
+  fillDatasetSelect(dsSel, state.cfg.dataset, $('datasetNote'));
+  syncDataset(state.cfg.dataset);
   dsSel.addEventListener('change', () => {
     state.cfg.dataset = dsSel.value;
     $('datasetNote').textContent = DATASETS[dsSel.value].note;
+    syncDataset(dsSel.value);
     reset();
     setRunning(state.running);
   });

@@ -1,12 +1,12 @@
 {
   "name": "gan-visualizer",
   "version": "1.0.0",
-  "description": "ブラウザで GAN の学習過程を可視化するローカルアプリ（依存ライブラリなし）",
+  "description": "ブラウザで GAN と自己回帰 Transformer の学習過程を可視化するローカルアプリ（依存ライブラリなし）",
   "type": "module",
   "private": true,
   "scripts": {
     "start": "node server.js",
-    "test": "node test/gan.test.js"
+    "test": "node test/gan.test.js && node test/ar.test.js"
   },
   "engines": { "node": ">=18" }
 }

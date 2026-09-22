@@ -14,6 +14,7 @@
   --lossD: #1baf7a;
   --lossG: #4a3aa7;
   --heat-mid: #fcfcfb;
+  --ar: #1baf7a;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -32,6 +33,7 @@
     --lossD: #199e70;
     --lossG: #9085e9;
     --heat-mid: #1a1a19;
+    --ar: #199e70;
   }
 }
 :root[data-theme="dark"] {
@@ -39,7 +41,7 @@
   --bg: #111110; --surface: #1a1a19; --surface-2: #242423; --border: #33332f;
   --text: #ffffff; --text-2: #c3c2b7; --muted: #8d8c84; --grid: #2a2a28;
   --accent: #3987e5; --real: #3987e5; --fake: #d95926; --lossD: #199e70; --lossG: #9085e9;
-  --heat-mid: #1a1a19;
+  --heat-mid: #1a1a19; --ar: #199e70;
 }
 
 * { box-sizing: border-box; }
@@ -147,4 +149,56 @@ canvas { display: block; width: 100%; height: 100%; border-radius: 8px; }
   .side { grid-template-columns: 1fr; }
   .stats { grid-template-columns: repeat(2, 1fr); }
   .guide-grid { grid-template-columns: 1fr; }
+}
+
+/* ---- ページ切り替えタブ ---- */
+.tabs { display: flex; gap: 4px; margin: 6px 0 4px; flex-wrap: wrap; }
+.tabs a {
+  font-size: 13px; padding: 4px 12px; border-radius: 999px; text-decoration: none;
+  color: var(--text-2); border: 1px solid var(--border); background: var(--surface);
+}
+.tabs a:hover { background: var(--surface-2); }
+.tabs a[aria-current="page"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+.dot.ar { background: var(--ar); }
+.line.ar { background: var(--ar); }
+.ramp.gray .bar { background: linear-gradient(90deg, var(--surface), color-mix(in oklab, var(--text) 80%, var(--surface))); }
+
+/* ---- 自己回帰：1点ずつ生成するパネル ---- */
+.gen-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.gen-actions button { padding: 5px 10px; font-size: 12px; }
+.gen-rows { display: grid; gap: 6px; }
+.gen-row { display: grid; grid-template-columns: 58px 1fr 44px; align-items: center; gap: 8px; font-size: 12px; }
+.gen-row .lbl { color: var(--text-2); }
+.gen-row .lbl b { display: block; color: var(--text); font-weight: 600; }
+.gen-row.pending { opacity: .45; }
+.gen-row .val { text-align: right; font-variant-numeric: tabular-nums; color: var(--text-2); }
+.bars { display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px; height: 34px; align-items: end; }
+.bars i { display: block; background: color-mix(in oklab, var(--ar) 45%, var(--surface)); border-radius: 3px 3px 0 0; min-height: 1px; position: relative; }
+.bars i.on { background: var(--ar); outline: 2px solid var(--text); outline-offset: 1px; }
+.bars-axis { display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px; font-size: 10px; color: var(--muted); text-align: center; }
+.formula { font-size: 12px; color: var(--text-2); margin-top: 8px; line-height: 1.5; font-variant-numeric: tabular-nums; }
+.formula b { color: var(--text); }
+
+/* ---- アテンションマップ ---- */
+.attn { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.attn figure { margin: 0; }
+.attn figcaption { font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+.attn table { border-collapse: separate; border-spacing: 2px; font-size: 10px; }
+.attn th { color: var(--muted); font-weight: 400; padding: 0 2px; white-space: nowrap; }
+.attn th.r { text-align: right; }
+.attn td { width: 22px; height: 18px; border-radius: 3px; text-align: center; font-variant-numeric: tabular-nums; }
+.attn td.na { background: transparent; }
+
+/* ---- 比較ページ ---- */
+.compare { display: grid; grid-template-columns: 250px repeat(2, minmax(0, 1fr)); gap: 14px; align-items: start; }
+.compare .stage .canvas-wrap.square { max-width: none; }
+.metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
+.charts2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 14px; }
+@media (max-width: 1180px) {
+  .compare { grid-template-columns: 1fr 1fr; }
+  .compare .controls { grid-column: 1 / -1; }
+}
+@media (max-width: 760px) {
+  .compare, .charts2 { grid-template-columns: 1fr; }
 }
