@@ -19,10 +19,11 @@ npm start            # = node server.js
 
 Node が使えない環境では `cd public && python3 -m http.server 8080` でも動きます。
 
-画面上部のタブで3つのページを切り替えます。選んでいる分布はページをまたいで引き継がれます。
+画面上部のタブで4つのページを切り替えます。選んでいる分布はページをまたいで引き継がれます。
 
 | ページ | 内容 |
 |---|---|
+| はじめて（偽札と警察） | GAN を「偽札職人（G）と警察（D）の勝負」にたとえて、9 ステップの紙芝居形式で順番に見せる。モード崩壊と勾配消失も体験できる。**最初はここから** |
 | GAN | Generator と Discriminator の攻防。点がアメーバのように動いて本物に近づく |
 | 自己回帰 Transformer | 点をトークン列にして「次のトークン」を予測。学習した確率 p(x) と、1点ずつ生成する過程、アテンションを表示 |
 | 比較 | 同じ分布・同じステップ数で両方を学習させ、品質（precision）と網羅性（recall）を並べる |
@@ -85,6 +86,7 @@ gan-visualizer/
 ├── server.js               静的ファイルサーバ（Node 標準モジュールのみ）
 ├── package.json
 ├── public/
+│   ├── guide.html          はじめて（偽札と警察）ページ
 │   ├── index.html          GAN ページ
 │   ├── ar.html             自己回帰 Transformer ページ
 │   ├── compare.html        比較ページ
@@ -99,6 +101,7 @@ gan-visualizer/
 │       ├── viz.js          Canvas 描画・チャート
 │       ├── ar-viz.js       Transformer ページのデータ空間の描画
 │       ├── common.js       ページ共通（ナビ、履歴）
+│       ├── guide-main.js   はじめてページ（ストーリーと段階的な学習）
 │       ├── main.js         GAN ページ
 │       ├── ar-main.js      Transformer ページ
 │       └── compare-main.js 比較ページ

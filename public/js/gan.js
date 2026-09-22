@@ -68,39 +68,39 @@ export class GAN {
     return this.D.backward(d, false);
   }
 
-  trainStep() {
-    const { batch: n, lrD, lrG, dSteps, loss } = this.cfg;
+  /** Discriminator を1回更新：本物→1、偽物→0 を当てるように（警察の勉強） */
+  trainD() {
+    const { batch: n, lrD } = this.cfg;
     let lossD = 0, dReal = 0, dFake = 0;
-
-    // ---- Discriminator の更新：本物→1、偽物→0 を当てるように ----
-    for (let s = 0; s < dSteps; s++) {
-      this.D.zeroGrad();
-      const xr = this.sampleReal(n);
-      const lr_ = this.D.forward(xr, n);
-      const gr = new Float64Array(n);
-      lossD = 0; dReal = 0; dFake = 0;
-      for (let i = 0; i < n; i++) {
-        const p = sigmoid(lr_[i]);
-        gr[i] = (p - 1) / n;
-        lossD -= logSig(lr_[i]) / n;
-        dReal += p / n;
-      }
-      this.D.backward(gr);
-
-      const xf = this.generate(this.sampleNoise(n), n);
-      const lf = this.D.forward(xf, n);
-      const gf = new Float64Array(n);
-      for (let i = 0; i < n; i++) {
-        const p = sigmoid(lf[i]);
-        gf[i] = p / n;
-        lossD -= logSig(-lf[i]) / n;
-        dFake += p / n;
-      }
-      this.D.backward(gf);
-      this.D.adamStep(lrD);
+    this.D.zeroGrad();
+    const xr = this.sampleReal(n);
+    const lr_ = this.D.forward(xr, n);
+    const gr = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      const p = sigmoid(lr_[i]);
+      gr[i] = (p - 1) / n;
+      lossD -= logSig(lr_[i]) / n;
+      dReal += p / n;
     }
+    this.D.backward(gr);
 
-    // ---- Generator の更新：D を騙すように ----
+    const xf = this.generate(this.sampleNoise(n), n);
+    const lf = this.D.forward(xf, n);
+    const gf = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      const p = sigmoid(lf[i]);
+      gf[i] = p / n;
+      lossD -= logSig(-lf[i]) / n;
+      dFake += p / n;
+    }
+    this.D.backward(gf);
+    this.D.adamStep(lrD);
+    return { lossD, dReal, dFake };
+  }
+
+  /** Generator を1回更新：D を騙すように（偽札職人の修行） */
+  trainG() {
+    const { batch: n, lrG, loss } = this.cfg;
     this.G.zeroGrad();
     const z = this.sampleNoise(n);
     const xg = this.G.forward(z, n);
@@ -122,9 +122,15 @@ export class GAN {
     const dx = this.D.backward(dl, false); // D のパラメータは更新しない
     this.G.backward(dx);
     this.G.adamStep(lrG);
+    return { lossG };
+  }
 
+  trainStep() {
+    let d;
+    for (let s = 0; s < this.cfg.dSteps; s++) d = this.trainD();
+    const { lossG } = this.trainG();
     this.step++;
-    this.last = { step: this.step, lossD, lossG, dReal, dFake };
+    this.last = { step: this.step, ...d, lossG };
     return this.last;
   }
 }

@@ -173,7 +173,7 @@ export class SpaceView {
         ctx.beginPath(); ctx.arc(px, py, r + 0.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
       }
       if (outside > 0) {
-        const msg = `生成点の ${Math.round((outside / n) * 100)}% が表示範囲外（縁の○）`;
+        const msg = `${s.fakeLabel || '生成点'}の ${Math.round((outside / n) * 100)}% が表示範囲外（縁の○）`;
         ctx.font = '12px system-ui, sans-serif';
         const tw = ctx.measureText(msg).width;
         ctx.fillStyle = surface;

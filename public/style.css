@@ -202,3 +202,58 @@ canvas { display: block; width: 100%; height: 100%; border-radius: 8px; }
 @media (max-width: 760px) {
   .compare, .charts2 { grid-template-columns: 1fr; }
 }
+
+/* ---- はじめて（偽札と警察）ガイド ---- */
+.guide-layout { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 14px; align-items: start; }
+.guide-layout .stage .canvas-wrap.square { max-width: calc(100vh - 250px); }
+.meters { display: grid; grid-template-columns: auto 1fr 1fr; gap: 18px; margin-top: 12px; align-items: end; }
+.meter .m-label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+.meter .m-label em { font-style: normal; margin-left: 4px; }
+.meter b { font-size: 16px; font-variant-numeric: tabular-nums; font-weight: 600; }
+.gauge { position: relative; height: 8px; border-radius: 4px; background: var(--surface-2); margin-bottom: 4px; overflow: hidden; }
+.gauge i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--text-2); border-radius: 4px; transition: width .2s; }
+.gauge s { position: absolute; left: 50%; top: -2px; bottom: -2px; width: 2px; background: var(--text); }
+.kinds { display: grid; grid-template-columns: repeat(8, 1fr); gap: 3px; margin-bottom: 4px; }
+.kinds i { height: 8px; border-radius: 2px; background: var(--surface-2); border: 1px solid var(--border); }
+.kinds i.on { background: var(--fake); border-color: var(--fake); }
+
+.story { position: sticky; top: 12px; display: flex; flex-direction: column; gap: 12px; }
+.story-top { display: flex; justify-content: space-between; align-items: center; }
+.step-no { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.dots { display: flex; gap: 5px; }
+.dots button { width: 9px; height: 9px; padding: 0; border-radius: 50%; border: none; background: var(--border); min-width: 0; }
+.dots button.on { background: var(--text); }
+.story-title { font-size: 18px; color: var(--text); margin: 0; line-height: 1.4; }
+.story-body { font-size: 14px; line-height: 1.85; color: var(--text); }
+.story-body p { margin: 0 0 10px; }
+.story-body p:last-child { margin-bottom: 0; }
+.chip { display: inline-block; padding: 0 7px 0 9px; border-radius: 4px; font-weight: 600; font-size: 13px; line-height: 1.6; }
+.chip.real { background: color-mix(in oklab, var(--real) 22%, var(--surface)); color: var(--text); box-shadow: inset 3px 0 0 var(--real); }
+.chip.fake { background: color-mix(in oklab, var(--fake) 22%, var(--surface)); color: var(--text); box-shadow: inset 3px 0 0 var(--fake); }
+.chip.police { background: var(--surface-2); color: var(--text); box-shadow: inset 3px 0 0 var(--text-2); }
+.story-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.story-actions:empty { display: none; }
+.story-actions button.act { background: var(--text); color: var(--bg); border-color: var(--text); }
+.story-actions button:disabled { opacity: .45; cursor: default; }
+.story-actions .done { font-size: 12px; color: var(--text-2); align-self: center; }
+.term { font-size: 12.5px; color: var(--text-2); background: var(--surface-2); border-radius: 8px; padding: 9px 11px; line-height: 1.7; }
+.term:empty { display: none; }
+.term b { color: var(--text); }
+.term .k { display: block; font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+.term table { border-collapse: collapse; width: 100%; }
+.term td { padding: 3px 0; border-top: 1px solid var(--border); vertical-align: top; }
+.term tr:first-child td { border-top: none; }
+.term td:first-child { color: var(--text); padding-right: 10px; white-space: nowrap; }
+.story-nav { display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; }
+.story-nav button { flex: 1; }
+.story-nav button:disabled { opacity: .4; cursor: default; }
+.links { display: flex; gap: 8px; flex-wrap: wrap; }
+.links a { font-size: 13px; color: var(--accent); }
+@media (max-width: 980px) {
+  .guide-layout { grid-template-columns: 1fr; }
+  .story { position: static; }
+}
+@media (max-width: 560px) {
+  .meters { grid-template-columns: 1fr 1fr; }
+  .meters .meter:first-child { grid-column: 1 / -1; }
+}

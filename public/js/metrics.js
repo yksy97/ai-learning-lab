@@ -58,5 +58,6 @@ export function modesCovered(fake, n, modes) {
     }
   }
   const need = Math.max(2, (n / centers.length) * 0.2);
-  return { covered: counts.filter((c) => c >= need).length, total: centers.length };
+  const flags = counts.map((c) => c >= need);
+  return { covered: flags.filter(Boolean).length, total: centers.length, flags };
 }
