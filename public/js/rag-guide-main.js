@@ -1,7 +1,8 @@
 // 「図書館の司書」ガイド：RAG のしくみを順番に見せる
 import { RagIndex } from './rag.js';
 import { RagMap } from './rag-viz.js';
-import { mountHeader } from './common.js';
+import { renderQuiz } from './quiz.js';
+import { mountHeader, enableGlossary } from './common.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -63,11 +64,21 @@ const STEPS = [
   },
   {
     title: '司書が資料を探す',
+    quiz: {
+      q: '司書は、質問と資料の「近さ」をどうやって測っているでしょう？',
+      options: [
+        { t: '質問に含まれる語が、その資料に何個あるかを数える', why: '惜しいです。素朴に数えると、長い資料ほど有利になり、「の」のようなどこにでもある語も同じ重みになります。TF-IDF（珍しい語を重く）とコサイン類似度（長さで割る）は、まさにその2点を直したものです。' },
+        { t: '数字のベクトルに変えて、向きの近さを測る' },
+        { t: '資料を先頭から読んで、意味が合うかを判断する', why: '読んで判断しているのは後半の LLM です。検索の段階にあるのは数式だけで、意味の理解は入っていません。' },
+      ],
+      answer: 1,
+      explain: '質問も資料も同じやり方でベクトルにし、コサイン類似度で比べています。地図はその近さを2次元に写したものです。',
+    },
     show: { map: true, ranking: true },
     question: QUESTION,
     body: `<p>質問「${QUESTION}」を ${C.librarian} に渡しました。</p>
-      <p>司書は質問も同じやり方で数字に変え、地図の上に置きます（ひし形）。あとは<b>近い順に資料を取る</b>だけです。線でつながれた資料が、司書が選んだものです。</p>
-      <p>右下のリストが、近い順に並べた結果です。数字は近さ（類似度）で、1 に近いほど似ています。</p>`,
+      <p>地図のひし形が質問の位置、線でつながれた資料が司書の選んだものです。司書がどうやって「近さ」を決めているか、下の問いに答えてみてください。</p>`,
+    reveal: '<p>司書は質問も同じやり方で数字に変え、地図の上に置きます。あとは<b>近い順に取る</b>だけです。右下のリストの数字が近さ（類似度）で、1 に近いほど似ています。</p>',
     term: `<span class="k">専門用語では</span>近さ ＝ <b>コサイン類似度</b>。上位 k 件を取ること ＝ <b>top-k 検索</b>。`,
   },
   {
@@ -89,26 +100,57 @@ const STEPS = [
   },
   {
     title: '失敗その1：棚にない質問',
+    quiz: {
+      q: '資料にない質問をされたとき、いちばん良い振る舞いは？',
+      options: [
+        { t: 'いちばん近い資料を1件だけ渡して、使うかどうかは LLM に判断させる', why: 'もっともらしいのですが危険です。LLM は渡された資料を「使うべきもの」と受け取るので、無関係でも無理に当てはめて書きます。渡す前に止めるほうが安全です。' },
+        { t: '資料を渡さず、「記載がない」と答えさせる' },
+        { t: 'k を増やして、候補をもっと広げる', why: '関係のない資料が増えるだけです。そもそも答えが資料の中にないので、広げても見つかりません。' },
+      ],
+      answer: 1,
+      explain: '関係のない資料は、それらしい嘘の材料になります。しきい値を決めておき、届かなければ答えないのが基本です。',
+    },
     show: { map: true, ranking: true, answer: true },
     question: MISSING,
     body: `<p>今度は「${MISSING}」と聞いてみます。この会社の資料には育児休業の規程がありません。</p>
-      <p>地図を見ると、質問のひし形がどの資料からも離れていて、どの類似度も低いままです。司書は「近い資料がない」と分かります。</p>
-      <p>ここで大事なのは、<b>近い資料がないときは何も渡さない</b>という判断です。無理に「いちばんマシな資料」を渡すと、作家はそれらしい嘘を書いてしまいます。</p>`,
+      <p>地図を見ると、質問のひし形がどの資料からも離れていて、どの類似度も低いままです。このとき司書はどうするのがよいでしょうか。</p>`,
+    reveal: '<p>大事なのは、<b>近い資料がないときは何も渡さない</b>という判断です。無理に「いちばんマシな資料」を渡すと、作家はそれらしい嘘を書いてしまいます。</p>',
     term: `<span class="k">専門用語では</span>この下限 ＝ <b>類似度のしきい値</b>。渡す資料がないときに素直に「わからない」と答えさせるのが、RAG の品質管理の基本。`,
   },
   {
     title: '失敗その2：言い方が違う',
+    quiz: {
+      q: '資料に「生成AI」としか書かれていないとき、「ChatGPT」で検索するとどうなる？',
+      options: [
+        { t: '文字の 2-gram で分けているので、「AI」の部分が一致して見つかる', why: '技術的にはもっともらしいのですが、この実装では英数字はひとかたまりの単語として扱います。「chatgpt」と「ai」は別のトークンなので、部分的にも一致しません。' },
+        { t: '語が一致しないので見つからない（類似度 0）' },
+        { t: '意味が近いので、順位は落ちるが上位には入る', why: 'この画面の検索に「意味」は入っていません。語が重ならなければ、内積は 0 のままです。意味で拾えるようにするのが埋め込みの役目です。' },
+      ],
+      answer: 1,
+      explain: '語の一致だけで探すとこうなります。実際の RAG では、意味を捉える埋め込みがこの差を吸収します。',
+    },
     show: { map: true, ranking: true },
     question: PARAPHRASE,
     expand: false,
     body: `<p>「${PARAPHRASE}」と聞いてみます。資料には「生成AI」と書かれていますが、「ChatGPT」という語は<b>1回も出てきません</b>。</p>
-      <p>いまは語の一致だけで探しているので、司書はこの資料を見つけられません。類似度は 0 のままです。</p>
-      <p>下のボタンで「言い換えを考慮する」に切り替えると、見つけられるようになります。本物の RAG では、ここを<b>意味のベクトル（埋め込み）</b>が引き受けます。</p>`,
+      <p>いまは語の一致だけで探しています。この質問で目的の資料が見つかるか、予想してから下のリストを見てください。</p>`,
+    reveal: '<p>見つけられません（類似度 0）。下のボタンで「言い換えを考慮する」に切り替えると見つかります。本物の RAG では、ここを<b>意味のベクトル（埋め込み）</b>が引き受けます。</p>',
     actions: [{ label: '言い換えを考慮する', toggle: 'expand' }],
     term: `<span class="k">専門用語では</span>語の一致で探す ＝ <b>キーワード検索（疎な検索）</b>、意味で探す ＝ <b>ベクトル検索（密な検索）</b>。両方を混ぜる <b>ハイブリッド検索</b>が実務ではよく使われる。`,
   },
   {
     title: 'まとめ',
+    quiz: {
+      kind: 'check',
+      q: '確認：RAG の答えの質は、主にどこで決まるでしょう？',
+      options: [
+        { t: 'LLM の賢さ', why: '渡した資料に答えが入っていなければ、賢さでは埋まりません。埋めようとした結果がハルシネーションです。' },
+        { t: '前半の検索（何を渡せたか）' },
+        { t: 'プロンプトの指示の丁寧さ', why: '「資料だけを根拠に」という指示は歯止めとして有効ですが、良い資料がなければ良い答えにはなりません。効くのは資料があるときです。' },
+      ],
+      answer: 1,
+      explain: '渡した資料に答えが含まれていなければ、どんな LLM でも正しく答えられません。RAG の改善は検索の改善から始めます。',
+    },
     show: { map: true, ranking: true, answer: true },
     question: QUESTION,
     body: `<p>RAG は「賢い作家をもっと賢くする」技術ではなく、<b>作家に正しい資料を渡す</b>技術です。</p>
@@ -139,6 +181,23 @@ function enterStep(i) {
   $('stepTitle').textContent = s.title;
   $('stepBody').innerHTML = s.body;
   $('stepTerm').innerHTML = s.term || '';
+  const qz = $('stepQuiz');
+  qz.innerHTML = '';
+  qz.className = '';
+  delete qz.dataset.answered;
+  if (s.reveal) {
+    // 予想クイズがある回は、答えにあたる説明を回答後まで伏せる
+    const rv = document.createElement('div');
+    rv.className = 'reveal';
+    rv.innerHTML = s.reveal;
+    rv.hidden = !!s.quiz;
+    $('stepBody').appendChild(rv);
+    qz.dataset.reveal = '1';
+  }
+  if (s.quiz) renderQuiz(qz, { id: `rag-guide:${i}`, ...s.quiz }, () => {
+    const rv = $('stepBody').querySelector('.reveal');
+    if (rv) rv.hidden = false;
+  });
   $('prev').disabled = i === 0;
   $('next').disabled = i === STEPS.length - 1;
   [...$('dots').children].forEach((d, k) => d.classList.toggle('on', k === i));
@@ -242,6 +301,7 @@ function init() {
   canvas.addEventListener('pointerleave', () => { map.hover = null; render(); });
   window.addEventListener('resize', render);
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', render);
+  enableGlossary();
   enterStep(0);
 }
 

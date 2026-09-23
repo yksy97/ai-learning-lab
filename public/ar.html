@@ -115,6 +115,12 @@
       </div>
 
       <div class="panel">
+        <h2>式で見る <span class="hint">項にマウスを乗せると対応する場所が光る</span></h2>
+        <div id="arFormula"></div>
+        <p class="f-hint">逆に、<b>トークンの棒グラフ・アテンションの表・NLL のグラフをクリック</b>すると、それが式のどの項かが光ります。</p>
+      </div>
+
+      <div class="panel">
         <div class="chart-head">
           <h2>負の対数尤度（1点あたり・nats）</h2>
           <div class="legend"><span><i class="line ar"></i>学習データ</span></div>
@@ -146,6 +152,8 @@
       </div>
     </div>
   </section>
+
+  <section class="panel guide" id="arCode"></section>
 
   <footer class="foot">キー操作：Space 再生/停止 ・ S 1ステップ ・ R リセット ・ G 1点を生成　|　Transformer も素の JavaScript で実装（外部ライブラリなし）</footer>
 

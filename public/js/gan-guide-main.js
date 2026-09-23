@@ -4,8 +4,9 @@ import { DATASETS } from './datasets.js';
 import { mulberry32, gaussian } from './nn.js';
 import { SpaceView } from './viz.js';
 import { modesCovered } from './metrics.js';
+import { renderQuiz } from './quiz.js';
 
-import { mountHeader } from './common.js';
+import { mountHeader, enableGlossary } from './common.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -109,20 +110,42 @@ const STEPS = [
   },
   {
     title: '職人は警察の反応から学ぶ',
+    quiz: {
+      q: '職人だけを修行させると、偽札（橙の点）はどちらへ動くでしょう？',
+      options: [
+        { t: '本物の点に向かってまっすぐ動く', why: '職人は本物を一度も見ていません。動く先は「警察が本物っぽいと思っている場所」であって、本物の点そのものではありません。両者はたいてい少しずれています。' },
+        { t: '警察が「本物っぽい」と判定している場所（青い側）へ動く' },
+        { t: '警察が「偽物」と判定している場所から、ただ遠ざかる', why: '遠ざかるだけでは方向が定まりません。勾配は「D(x) が上がる向き」を指しているので、逃げるのではなく青い方へ登っていきます。' },
+      ],
+      answer: 1,
+      explain: '職人の目標は「警察に本物っぽいと思われる」ことだけです。矢印は D の出力が上がる方向、つまり青い方を指しています。',
+    },
     config: 'normal', needD: 20,
     show: { heat: true, real: true, fake: true, grad: true },
     body: `<p>職人は本物を見られませんが、<b>警察の地図は見られます</b>。</p>
       <p>矢印は「偽札をこっちに直せば、警察にもっと本物っぽいと思われる」という方向です。スイカ割りで「右！もっと前！」と声をかけてもらうようなものです。</p>
-      <p>ボタンを押すと、職人だけが修行します。偽札が矢印の方向へ、つまり青い場所へ動くはずです。</p>`,
+      <p>ボタンを押すと、職人だけが修行します。押す前に、下の予想に答えてみてください。</p>`,
+    reveal: '<p>矢印の方向、つまり青い場所へ偽札が動いていきます。職人は本物を見ないまま、警察の地図を登っているだけです。</p>',
     actions: [{ label: '職人に修行させる（10回）', kind: 'G', total: 10, perFrame: 1 }],
     term: `<span class="k">専門用語では</span>矢印 ＝ <b>勾配（こうばい）</b>。修行 ＝ <b>パラメータの更新</b>。職人は警察を通してしか本物を知らない、というのが GAN のいちばん不思議なところ。`,
   },
   {
     title: 'いたちごっこ',
+    quiz: {
+      q: '交互に修行させると、警察の地図（背景）はどうなるでしょう？',
+      options: [
+        { t: '一度できた地図はほぼ固定で、偽札だけが動いていく', why: '警察も毎回学習し直しています。相手が動くので、正解の地図も動き続けます。ここが「止まっている的を撃つ」普通の学習と決定的に違うところです。' },
+        { t: '偽札を追いかけるように塗り替わり続ける' },
+        { t: '偽札が本物に近づくほど、画面全体が青（本物）に寄っていく', why: '警察は最後まで本物と偽物を分けようとします。均衡で起きるのは「全体が青くなる」ではなく「色が薄くなる」（D ≈ 0.5）です。' },
+      ],
+      answer: 1,
+      explain: '職人が新しい場所へ移ると、警察はそこを怪しいと塗り直します。互いに相手を追いかけ続けるのが敵対的学習です。',
+    },
     config: 'normal', needD: 20,
     show: { heat: true, real: true, fake: true },
     body: `<p>職人がうまくなると、警察は新しい偽札を見破るために勉強し直します。すると職人もまた直します。</p>
-      <p>これを <b>交互に</b> くり返すのが GAN の学習です。ボタンを押して、警察の地図（背景）が偽札を追いかけるように変わっていく様子を見てください。</p>`,
+      <p>これを <b>交互に</b> くり返すのが GAN の学習です。ボタンを押す前に、背景の地図がどうなるか予想してみてください。</p>`,
+    reveal: '<p>警察の地図が、偽札を追いかけるように塗り替わり続けます。相手が動くので、目標そのものが動き続けます。</p>',
     actions: [{ label: '交互に修行（50回）', kind: 'both', total: 50, perFrame: 2 }],
     term: `<span class="k">専門用語では</span>交互に競わせて学ぶこと ＝ <b>敵対的学習</b>（GAN の「A」＝ Adversarial）。`,
   },
@@ -138,26 +161,57 @@ const STEPS = [
   },
   {
     title: '失敗その1：あせる職人',
+    quiz: {
+      q: '職人だけがせっかち（学習率が大きい）だと、何が起きるでしょう？',
+      options: [
+        { t: '上達が速くなり、8つの山を早く全部作れるようになる', why: '速く動くことと、まんべんなく作ることは別です。1回で大きく動くほど、その瞬間いちばん得な1か所へ集中しやすくなります。' },
+        { t: '偽札が一部の山にかたまり、山から山へ飛び移る' },
+        { t: '偽札が画面全体に均等にばらまかれる', why: 'それは学習がまだ進んでいない状態の見え方です。モード崩壊は逆で、狭い場所に集まってしまう失敗です。' },
+      ],
+      answer: 1,
+      explain: 'これがモード崩壊です。うまく騙せた1か所に集中し、警察が気づくと、かたまりごと別の場所へ移動します。',
+    },
     config: 'collapse', fresh: true,
     show: { heat: true, real: true, fake: true },
     play: true,
     body: `<p>最初からやり直します。今度は職人が<b>せっかち</b>（1回で大きく直しすぎる）で、警察は<b>のんびり</b>（なかなか学ばない）という組み合わせです。</p>
-      <p>職人は、ある場所でうまく騙せると、そこばかり作るようになります。警察が気づくと、偽札が<b>ひとかたまりのまま</b>別の場所へ飛び移ります。一発屋の芸人が、持ちネタを1つずつ乗り換えていくようなものです。</p>
-      <p>「作れているお札の種類」がなかなか増えないことに注目してください。</p>`,
+      <p>再生する前に、何が起きるか予想してみてください。下の「作れているお札の種類」に注目です。</p>`,
+    reveal: '<p>職人は、うまく騙せた場所ばかり作るようになります。警察が気づくと、偽札が<b>ひとかたまりのまま</b>別の場所へ飛び移ります。一発屋の芸人が、持ちネタを1つずつ乗り換えていくようなものです。</p>',
     term: `<span class="k">専門用語では</span>一部の種類しか作れなくなる現象 ＝ <b>モード崩壊（mode collapse）</b>。1回に直す量 ＝ <b>学習率</b>。`,
   },
   {
     title: '失敗その2：厳しすぎる警察',
+    quiz: {
+      q: '警察が強すぎて偽札を 100% 見破るようになると、職人はどうなるでしょう？',
+      options: [
+        { t: '手がかりを失って迷走する' },
+        { t: '差が大きいぶん強い信号が返るので、かえって速く上達する', why: '直感に反しますが逆です。D(G(z)) がほぼ 0 の領域では、元のミニマックス損失の勾配もほぼ 0 になります。「差が大きい」ことと「勾配が大きい」ことは別です。' },
+        { t: 'G の損失が 0 になり、そこで学習が止まる', why: 'G の損失はむしろ大きいままです。値が大きいことと、直すべき向きが分かることは別問題で、消えているのは後者です。' },
+      ],
+      answer: 0,
+      explain: '「全部ダメ」しか返ってこないと、どちらへ直せばよいかの情報（勾配）が消えます。これが勾配消失です。',
+    },
     config: 'vanish', fresh: true,
     show: { heat: true, real: true, fake: true },
     play: true,
     body: `<p>もう一度やり直します。今度は警察が<b>とても優秀で厳しい</b>うえに、職人は昔ながらの学び方をします。</p>
-      <p>警察はすぐに偽札を 100% 見破るようになり、「全部ダメ」としか言わなくなります。すると職人は<b>どっちへ直せばいいかの手がかりを失い</b>、見当違いの方向へ進んで、画面の外へ飛んでいってしまいます。</p>
-      <p>「全部ダメ」としか言わない先生からは、何を直せばいいか学べない、というのと同じです。</p>`,
+      <p>警察はすぐに偽札を 100% 見破るようになります。そのとき職人がどうなるか、予想してから再生してみてください。</p>`,
+    reveal: '<p>警察が「全部ダメ」としか言わなくなるので、職人は<b>どちらへ直せばいいかの手がかりを失い</b>、見当違いの方向へ進んで画面の外へ出ていきます。「全部ダメ」しか言わない先生からは何も学べない、というのと同じです。</p>',
     term: `<span class="k">専門用語では</span>手がかり（勾配）がほとんど消えてしまう現象 ＝ <b>勾配消失</b>。今は、職人が「どれくらい本物っぽいと思われたか」を直接上げにいく<b>非飽和損失</b>という学び方が標準で、この失敗を起こしにくい。`,
   },
   {
     title: 'まとめ',
+    quiz: {
+      kind: 'check',
+      q: '確認：GAN の Generator は、本物のデータをどう使っているでしょう？',
+      options: [
+        { t: '学習の最初だけ本物を見て、あとは Discriminator の反応に従う', why: '最初も見ません。実装上も G の入力はノイズ z だけで、本物のデータは G の計算に一度も登場しません。' },
+        { t: '本物は一度も見ず、Discriminator の判定だけを手がかりにしている' },
+        { t: 'バッチの半分が本物、半分が生成で、両方を見比べながら学ぶ', why: 'その「見比べ」をしているのは Discriminator です。G の更新に使うのは、自分が作った偽物に対する D の反応だけです。' },
+      ],
+      answer: 1,
+      explain: '本物を見るのは D だけ。G はその D の反応を通じて間接的に学びます。この非対称さが GAN の本質です。',
+    },
     config: 'normal', fresh: true,
     show: { heat: true, real: true, fake: true },
     play: true, autoplay: true,
@@ -194,6 +248,23 @@ function enterStep(i) {
   $('stepTitle').textContent = s.title;
   $('stepBody').innerHTML = s.body;
   $('stepTerm').innerHTML = s.term || '';
+  const qz = $('stepQuiz');
+  qz.innerHTML = '';
+  qz.className = '';
+  delete qz.dataset.answered;
+  if (s.reveal) {
+    // 予想クイズがある回は、答えにあたる説明を回答後まで伏せる
+    const rv = document.createElement('div');
+    rv.className = 'reveal';
+    rv.innerHTML = s.reveal;
+    rv.hidden = !!s.quiz;
+    $('stepBody').appendChild(rv);
+    qz.dataset.reveal = '1';
+  }
+  if (s.quiz) renderQuiz(qz, { id: `gan-guide:${i}`, ...s.quiz }, () => {
+    const rv = $('stepBody').querySelector('.reveal');
+    if (rv) rv.hidden = false;
+  });
   $('prev').disabled = i === 0;
   $('next').disabled = i === STEPS.length - 1;
   [...$('dots').children].forEach((d, k) => d.classList.toggle('on', k === i));
@@ -334,6 +405,7 @@ function init() {
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => render(true));
 
   resetGan('normal');
+  enableGlossary();
   enterStep(0);
   requestAnimationFrame(loop);
 }

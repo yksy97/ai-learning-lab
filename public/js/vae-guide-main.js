@@ -2,7 +2,8 @@
 import { VAE, VAE_DEFAULTS } from './vae.js';
 import { mulberry32, gaussian } from './nn.js';
 import { VAESpaceView, drawLatent } from './vae-viz.js';
-import { mountHeader } from './common.js';
+import { renderQuiz } from './quiz.js';
+import { mountHeader, enableGlossary } from './common.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -76,22 +77,43 @@ const STEPS = [
   },
   {
     title: 'メモから描き直す',
+    quiz: {
+      q: '練習させると、紫の線（元の点 → 復元）はどうなるでしょう？',
+      options: [
+        { t: '短くなる' },
+        { t: '長さは変わらず、向きだけがそろっていく', why: '学習が小さくしているのは、まさにこの線の長さ（再構成誤差）です。向きではなく長さが縮みます。' },
+        { t: 'すぐに長さ 0 になる', why: 'メモにはあいまいさ（σ）があり、あとで出てくる KL 項も邪魔をするので、0 にはなりません。ぴったり 0 になるなら、それはただのコピー機です。' },
+      ],
+      answer: 0,
+      explain: '線の長さが再構成誤差そのものです。学習はこれを小さくする方向に進みます。',
+    },
     config: 'normal', needSteps: 0,
     show: { real: true, recon: true },
     latent: true,
     body: `<p>紫の線は「元の絵」と「メモから描き直した絵」を結んだものです。線が長いほど、うまく描き直せていません。</p>
-      <p>ボタンを押して練習させると、線がみるみる短くなります。これが<b>再構成</b>の学習です。</p>`,
+      <p>ボタンを押すと練習が始まります。押す前に、この線がどうなるか予想してみてください。</p>`,
+    reveal: '<p>線はみるみる短くなります。これが<b>再構成</b>の学習です。ただし 0 にはなりません。</p>',
     actions: [{ label: '練習する（100回）', total: 100, perFrame: 5 }],
     term: `<span class="k">専門用語では</span>線の長さ ＝ <b>再構成誤差</b>。これだけを小さくする仕組みは<b>オートエンコーダ</b>と呼ばれる。`,
   },
   {
     title: 'メモの書式をそろえる',
+    quiz: {
+      q: 'なぜメモを「決まった場所（標準的な円の中）」にそろえる必要があるのでしょう？',
+      options: [
+        { t: '復元をもっと正確にするため', why: '逆です。そろえる力は復元の邪魔をします。復元の正確さだけが目的なら β = 0（そろえない）が最善で、そのとき生成が壊れます。' },
+        { t: 'あとでメモ帳の適当な場所を指さして、新しく描かせるため' },
+        { t: '潜在空間を狭くして、計算を軽くするため', why: '計算量は z の次元数で決まります。KL 項は「どこに置くか」の話で、速度とは関係ありません。' },
+      ],
+      answer: 1,
+      explain: '新しく作るときは、メモ帳からランダムに1点を引きます。そこが空白だと何も描けないので、事前に整えておきます。',
+    },
     config: 'normal',
     show: { real: true, recon: true },
     latent: true, play: true,
     body: `<p>ところで、なぜ職人はメモを<b>ぼんやり</b>書き、しかも<b>決まった場所</b>に置くのでしょうか。</p>
-      <p>それは、あとで「メモ帳の適当な場所」を指さして「ここのメモで1枚描いて」と言えるようにするためです。メモがバラバラの場所に散らばっていると、指さした先が空白で、何も描けません。</p>
-      <p>そこで、すべての楕円を破線の円（標準的な書式）の中にそろえる力が働きます。自動で学習させて、メモ帳が整っていく様子を見てください。</p>`,
+      <p>先に下の問いに答えてから、自動で学習させて、メモ帳が整っていく様子を見てください。</p>`,
+    reveal: '<p>理由は、あとで「メモ帳の適当な場所」を指さして「ここのメモで1枚描いて」と言えるようにするためです。メモが散らばっていると、指さした先が空白で何も描けません。そこで、すべての楕円を破線の円（標準的な書式）の中にそろえる力が働きます。</p>',
     term: `<span class="k">専門用語では</span>この「そろえる力」＝ <b>KL 項</b>。事前分布 N(0, I) に近づける。強さを決めるのが <b>β</b>。`,
   },
   {
@@ -106,26 +128,57 @@ const STEPS = [
   },
   {
     title: '失敗その1：メモが自由すぎる',
+    quiz: {
+      q: 'β = 0（そろえる力なし）にすると、どうなるでしょう？',
+      options: [
+        { t: '復元も生成も良くなる', why: '復元だけが良くなります。ここが綱引きで、片方を強く取ると、もう片方が崩れます。両立させる中間が必要です。' },
+        { t: '復元は上手いが、新しく作ると変な場所に点が出る' },
+        { t: 'KL を無視するので、メモが原点のまわりに集まる', why: '原点へ引き寄せていたのが KL 項です。それを 0 にすると、引き寄せる力が消えるので、逆に散らばります。' },
+      ],
+      answer: 1,
+      explain: 'ただのオートエンコーダになります。潜在空間が散らかるので、ランダムな z が「学習していない場所」を引いてしまいます。',
+    },
     config: 'free', fresh: true,
     show: { real: true, samples: true, density: true },
     latent: true, play: true,
     body: `<p>「そろえる力」をゼロ（β = 0）にしてやり直します。職人は好きなようにメモを取れます。</p>
-      <p>復元はとても上手になります。しかしメモ帳を見てください。印があちこちに散らばり、破線の円からはみ出しています。</p>
-      <p>その状態でメモ帳の適当な場所を指さすと、そこは「何も書かれていない場所」なので、変な絵が出てきます。<b>復元はできるが、新しく作れない</b>という状態です。</p>`,
+      <p>何が起きるか予想してから、再生してみてください。メモ帳と、描かれた絵の両方に注目です。</p>`,
+    reveal: '<p>復元はとても上手になります。しかしメモ帳では印が散らばり、破線の円からはみ出します。その状態で適当な場所を指さすと、そこは「何も書かれていない場所」なので変な絵が出ます。<b>復元はできるが、新しく作れない</b>という状態です。</p>',
     term: `<span class="k">専門用語では</span>これはただの<b>オートエンコーダ</b>。生成モデルとしては使えない。`,
   },
   {
     title: '失敗その2：メモが空っぽ',
+    quiz: {
+      q: 'β を極端に大きくすると、楕円（メモ）はどうなるでしょう？',
+      options: [
+        { t: '中心に集まりながら、小さく鋭くなる', why: '中心に集まるところは合っていますが、大きさは逆です。KL が最小になるのは μ=0 かつ σ=1 のときなので、σ は小さくならず 1 に近づきます。' },
+        { t: '全部が標準の円（1σ）にぴったり重なる' },
+        { t: '原点から遠くへ、外側に広がっていく', why: 'KL 項は原点へ引き寄せる向きに働きます。広がるのは、そろえる力を 0 にしたときのほうです。' },
+      ],
+      answer: 1,
+      explain: '事後崩壊です。すべての入力に対して同じメモ（＝情報ゼロ）を書くのが、KL 項にとっていちばん得になります。',
+    },
     config: 'collapse', fresh: true,
     show: { real: true, samples: true, density: true },
     latent: true, play: true,
     body: `<p>逆に「そろえる力」を極端に強く（β = 150）してやり直します。</p>
-      <p>職人にとっては、何も書かずに<b>全部同じメモ</b>にしてしまうのが一番ラクです。メモ帳では、すべての楕円が円の中央に重なっていきます。</p>
-      <p>こうなると、どこを指さしても同じような絵しか出てきません。下の「メモの情報量」がほぼ 0 になります。</p>`,
+      <p>メモ帳の楕円がどうなるか予想してから、再生してみてください。</p>`,
+    reveal: '<p>職人にとっては、何も書かずに<b>全部同じメモ</b>にするのが一番ラクです。すべての楕円が標準の円に重なり、どこを指さしても同じような絵しか出てきません。下の「メモの情報量」がほぼ 0 になります。</p>',
     term: `<span class="k">専門用語では</span><b>事後崩壊（posterior collapse）</b>。デコーダが z を無視してしまう状態。`,
   },
   {
     title: 'まとめ',
+    quiz: {
+      kind: 'check',
+      q: '確認：VAE のエンコーダが点ではなく「楕円」を出すのはなぜ？',
+      options: [
+        { t: '学習データに含まれるノイズを吸収するため', why: 'ノイズ対策ではありません。目的は、近くの z からも似たものが出るようにして、潜在空間を隙間なく使える状態にすることです。' },
+        { t: 'あいまいさを持たせ、潜在空間を連続的に埋めるため' },
+        { t: '点のままだと勾配が計算できないため', why: '点でも勾配は計算できます（それがオートエンコーダ）。むしろ「くじ引き」を入れたせいで勾配が通らなくなるのを、再パラメータ化で解決しています。' },
+      ],
+      answer: 1,
+      explain: '幅（σ）があることで、近くの z からも似た点が復元されます。これが「メモ帳の適当な場所から描ける」状態を作ります。',
+    },
     config: 'normal', fresh: true,
     show: { real: true, samples: true, density: true },
     latent: true, play: true, autoplay: true,
@@ -157,6 +210,23 @@ function enterStep(i) {
   $('stepTitle').textContent = s.title;
   $('stepBody').innerHTML = s.body;
   $('stepTerm').innerHTML = s.term || '';
+  const qz = $('stepQuiz');
+  qz.innerHTML = '';
+  qz.className = '';
+  delete qz.dataset.answered;
+  if (s.reveal) {
+    // 予想クイズがある回は、答えにあたる説明を回答後まで伏せる
+    const rv = document.createElement('div');
+    rv.className = 'reveal';
+    rv.innerHTML = s.reveal;
+    rv.hidden = !!s.quiz;
+    $('stepBody').appendChild(rv);
+    qz.dataset.reveal = '1';
+  }
+  if (s.quiz) renderQuiz(qz, { id: `vae-guide:${i}`, ...s.quiz }, () => {
+    const rv = $('stepBody').querySelector('.reveal');
+    if (rv) rv.hidden = false;
+  });
   $('prev').disabled = i === 0;
   $('next').disabled = i === STEPS.length - 1;
   [...$('dots').children].forEach((d, k) => d.classList.toggle('on', k === i));
@@ -274,6 +344,7 @@ function init() {
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => render(true));
 
   resetVae('normal');
+  enableGlossary();
   enterStep(0);
   requestAnimationFrame(loop);
 }

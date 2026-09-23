@@ -49,8 +49,9 @@
   <footer class="foot">すべてブラウザ内の JavaScript で計算（外部ライブラリなし）</footer>
 
   <script type="module">
-    import { MODELS, mountHeader } from './js/common.js';
+    import { MODELS, mountHeader, enableGlossary } from './js/common.js';
     mountHeader({ sub: '機械学習のモデルを、動かしながら見て理解するための可視化アプリ' });
+    enableGlossary(['.hero', '.guide']);
     const groups = [];
     for (const m of MODELS) {
       let g = groups.find((x) => x.kind === m.kind);

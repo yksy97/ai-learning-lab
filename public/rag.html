@@ -70,6 +70,12 @@
       </div>
 
       <div class="panel">
+        <h2>式で見る <span class="hint">項にマウスを乗せると対応する場所が光る</span></h2>
+        <div id="ragFormula"></div>
+        <p class="f-hint">逆に、<b>検索結果・プロンプト・k やしきい値のつまみ</b>をクリックすると、それが式のどの項かが光ります。</p>
+      </div>
+
+      <div class="panel">
         <h2>回答 <span class="hint" id="answerHint"></span></h2>
         <div id="answer" class="answer">質問を入力して「検索する」を押してください。</div>
         <p class="note">本物の RAG では、ここを LLM が資料を読んで書きます。この画面には LLM が入っていないので、代わりに<b>取り出した資料から関係の深い文をそのまま抜き出して</b>並べています。</p>
@@ -108,6 +114,8 @@
       </div>
     </div>
   </section>
+
+  <section class="panel guide" id="ragCode"></section>
 
   <footer class="foot">検索はすべてブラウザ内で計算（文字 2-gram ＋ TF-IDF ＋ コサイン類似度）</footer>
 

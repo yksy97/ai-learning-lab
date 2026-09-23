@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ML Visualizer · 学習パス</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M6 24 L16 8 L26 24' stroke='%233987e5' stroke-width='4' fill='none'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="top"><div id="nav"></div></header>
+
+  <main class="layout" style="grid-template-columns: minmax(0,1fr) 340px">
+    <section>
+      <div class="panel hero">
+        <h2 class="hero-title">0 から実用までの順路</h2>
+        <p>上から順に進むのがおすすめです。各ステップには「なぜやるか」「どこを触るか」「どう確かめるか」が書いてあります。
+          チェックを付けると、そのステップの用語が復習キューに入ります。進捗はこのブラウザにだけ保存されます。</p>
+        <div class="path-progress">
+          <div class="gauge"><i id="bar"></i></div>
+          <b id="pct">0%</b>
+          <button id="reset" style="font-size:12px;padding:4px 10px">記録を消す</button>
+        </div>
+      </div>
+      <div id="path"></div>
+    </section>
+
+    <aside class="side">
+      <div class="panel">
+        <h2>今日の復習 <span class="hint" id="reviewCount"></span></h2>
+        <div id="review" class="review-card"></div>
+        <p class="note">思い出せたら間隔が伸び（1日 → 3日 → 7日 → 16日 → 35日）、あやしければ翌日また出ます。</p>
+      </div>
+      <div class="panel">
+        <h2>使い方のコツ</h2>
+        <div class="gl-body">
+          <p>1回で完璧に理解しようとしないこと。<b>触る → 少し分かる → 用語カードを読む → また触る</b>の往復が効きます。</p>
+          <p>説明できるかどうかが、理解できたかどうかの判定基準です。各ステップの「確かめ方」を声に出して言ってみてください。</p>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="foot">進捗はこのブラウザの中だけに保存されます（サーバには何も送られません）</footer>
+
+  <script type="module">
+    import { PATH, PATH_LAYERS } from './js/curriculum.js';
+    import { TERM_BY_ID } from './js/glossary.js';
+    import { mountHeader, enableGlossary } from './js/common.js';
+    import { getProgress, setDone, dueTerms, reviewed, reviewCount, resetAll } from './js/progress.js';
+
+    mountHeader({ id: 'learn', mode: 'detail', sub: '第0層（数学の道具）から実用まで。進捗と復習をこのブラウザに記録する' });
+    const $ = (id) => document.getElementById(id);
+
+    function renderPath() {
+      const p = getProgress();
+      $('path').innerHTML = PATH_LAYERS.map((l) => `
+        <div class="panel" style="margin-bottom:12px">
+          <h2>${l.label}</h2>
+          <p class="note" style="margin-top:0">${l.note}</p>
+          <div class="path">
+            ${PATH.filter((x) => x.layer === l.id).map((x) => `
+              <div class="path-item ${p.done[x.id] ? 'done' : ''}" data-id="${x.id}">
+                <input type="checkbox" ${p.done[x.id] ? 'checked' : ''} aria-label="${x.title} を完了にする" />
+                <div>
+                  <h3>${x.title}</h3>
+                  <p>${x.why}</p>
+                  <p><b>確かめ方：</b>${x.check}</p>
+                  <div class="path-links">${x.links.map((k) => `<a href="${k.h}">${k.t} →</a>`).join('')}</div>
+                </div>
+              </div>`).join('')}
+          </div>
+        </div>`).join('');
+      const done = PATH.filter((x) => p.done[x.id]).length;
+      const pct = Math.round((done / PATH.length) * 100);
+      $('bar').style.width = `${pct}%`;
+      $('pct').textContent = `${pct}%（${done} / ${PATH.length}）`;
+    }
+
+    $('path').addEventListener('change', (e) => {
+      const item = e.target.closest('.path-item');
+      if (!item) return;
+      const step = PATH.find((x) => x.id === item.dataset.id);
+      setDone(step.id, e.target.checked, step.terms || []);
+      renderPath();
+      renderReview();
+    });
+    $('reset').addEventListener('click', () => { resetAll(); renderPath(); renderReview(); });
+
+    let card = null;
+    function renderReview() {
+      const due = dueTerms(1);
+      $('reviewCount').textContent = `登録 ${reviewCount()} 語`;
+      if (!due.length) {
+        $('review').innerHTML = '<div class="gl-body">いまは復習する用語がありません。左のステップにチェックを付けると溜まっていきます。</div>';
+        return;
+      }
+      const t = TERM_BY_ID.get(due[0].id);
+      if (!t) { reviewed(due[0].id, true); return renderReview(); }
+      card = t;
+      $('review').innerHTML = `
+        <div class="review-q">${t.ja}</div>
+        <div class="gl-body">説明できますか？</div>
+        <div class="drill-actions"><button id="show" class="act">答えを見る</button></div>
+        <div class="review-a" id="ans" hidden>
+          ${t.short}${t.story ? `<br><span style="color:var(--muted)">たとえ：</span>${t.story}` : ''}
+          ${t.symbol ? `<br><span style="color:var(--muted)">記号：</span><span class="mono">${t.symbol}</span>` : ''}
+          <div class="drill-actions" style="margin-top:8px">
+            <button id="ok">思い出せた</button>
+            <button id="ng">あやしい</button>
+          </div>
+        </div>`;
+      $('show').addEventListener('click', () => { $('ans').hidden = false; });
+      $('ok').addEventListener('click', () => { reviewed(card.id, true); renderReview(); });
+      $('ng').addEventListener('click', () => { reviewed(card.id, false); renderReview(); });
+    }
+
+    renderPath();
+    renderReview();
+    enableGlossary(['.hero', '.gl-body', '.path-item']);
+  </script>
+</body>
+</html>

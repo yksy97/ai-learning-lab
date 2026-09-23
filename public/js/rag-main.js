@@ -2,7 +2,10 @@
 import { RagIndex } from './rag.js';
 import { PRESET_QUESTIONS } from './rag-corpus.js';
 import { RagMap } from './rag-viz.js';
-import { mountHeader } from './common.js';
+import { mountHeader, enableGlossary } from './common.js';
+import { LiveFormula } from './formula.js';
+import { codeBox } from './codebox.js';
+import { RAG_CODE } from './code-snippets.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -24,6 +27,39 @@ const state = {
 
 let index;
 const map = new RagMap($('map'));
+
+const formula = new LiveFormula($('ragFormula'), {
+  rows: [
+    {
+      label: '類似度',
+      tpl: 'cos(q, d) = (q · d) / (‖q‖ ‖d‖)　1位 = {{s1}}、2位 = {{s2}}、3位 = {{s3}}',
+      slots: {
+        s1: { hl: '#results', tip: 'いちばん近い資料との類似度' },
+        s2: { hl: '#results', tip: '2番目' },
+        s3: { hl: '#results', tip: '3番目' },
+      },
+      note: 'ベクトルは正規化済みなので、内積がそのままコサイン類似度になる',
+    },
+    {
+      label: '採用',
+      tpl: '採用 = {類似度 ≥ {{th}} の上位 {{k}} 件} → {{n}} 件をプロンプトに入れた',
+      slots: {
+        th: { tip: 'しきい値（左のスライダー）' },
+        k: { tip: '取り出す件数 k' },
+        n: { hl: '#prompt', tip: '実際にプロンプトへ入った件数' },
+      },
+    },
+    {
+      label: '重み',
+      tpl: 'w(語) = tf × log(N / df)　N = {{N}} 件の資料、語彙 {{V}} 種類',
+      slots: {
+        N: { tip: 'チャンクの総数' },
+        V: { tip: '文字 2-gram の種類数' },
+      },
+      note: '珍しい語ほど重くなる（TF-IDF）',
+    },
+  ],
+});
 
 function rebuild() {
   index = new RagIndex({ chunkMode: state.chunkMode, weighting: state.weighting, expand: state.expand });
@@ -78,6 +114,14 @@ function run() {
       ${r.terms.length ? `<div class="r-terms">一致した語：${r.terms.slice(0, 6).map((t) => `<code>${t.term}</code>`).join(' ')}</div>` : '<div class="r-terms">一致した語：なし</div>'}
     </div>`;
   }).join('');
+
+  formula.update({
+    s1: res[0] ? res[0].score : 0,
+    s2: res[1] ? res[1].score : 0,
+    s3: res[2] ? res[2].score : 0,
+    th: state.threshold, k: state.k, n: picked.length,
+    N: index.chunks.length, V: index.vocab.length,
+  });
 
   // プロンプトと回答
   const prompt = RagIndex.buildPrompt(q, picked);
@@ -151,6 +195,16 @@ function init() {
   window.addEventListener('resize', () => { if (state.results) run(); });
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (state.results) run(); });
 
+  formula.linkSources({
+    '#results': ['s1', 's2', 's3'],
+    '#prompt': ['n'],
+    '#corpusNote': ['N', 'V'],
+    '.controls section:nth-child(2) .field:nth-child(2)': ['k'],
+    '.controls section:nth-child(2) .field:nth-child(3)': ['th'],
+  });
+
+  codeBox($('ragCode'), { items: RAG_CODE });
+  enableGlossary();
   rebuild();
 }
 

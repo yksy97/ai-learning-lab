@@ -4,7 +4,10 @@ import { DATASETS } from './datasets.js';
 import { mulberry32, gaussian } from './nn.js';
 import { LineChart } from './viz.js';
 import { VAESpaceView, drawLatent } from './vae-viz.js';
-import { History, initialDataset, syncDataset, fillDatasetSelect, mountHeader } from './common.js';
+import { History, initialDataset, syncDataset, fillDatasetSelect, mountHeader, enableGlossary } from './common.js';
+import { LiveFormula } from './formula.js';
+import { codeBox } from './codebox.js';
+import { VAE_CODE } from './code-snippets.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -44,6 +47,35 @@ const chart = new LineChart($('chartLoss'), {
   fmt: (v) => v.toFixed(2),
   robustY: true,
   yMin: 0,
+});
+
+const formula = new LiveFormula($('vaeFormula'), {
+  rows: [
+    {
+      label: '全体',
+      tpl: 'L = 再構成 + β × KL = {{rec}} + {{beta}} × {{kl}} = {{tot}}',
+      slots: {
+        rec: { hl: '#main', tip: '元の点に戻せていないほど大きい' },
+        beta: { tip: 'KL 項の重み（左のスライダー）' },
+        kl: { hl: '#latent', tip: 'メモを標準の円へそろえる力' },
+        tot: { hl: '#chartLoss', tip: 'この合計を小さくするのが学習' },
+      },
+    },
+    {
+      label: '再構成',
+      tpl: '再構成 = ‖x − x̂‖² / (2σₓ²) = {{mse}} / (2 × {{sx}}²)',
+      slots: {
+        mse: { hl: '#main', tip: '元の点と復元の差の2乗（平均）' },
+        sx: { tip: '復元の厳しさ σₓ' },
+      },
+    },
+    {
+      label: 'KL',
+      tpl: 'KL = ½ Σ (σ² + μ² − 1 − 2 log σ) = {{kl2}}',
+      slots: { kl2: { hl: '#latent', tip: '楕円が標準の円と一致すると 0' } },
+      note: 'μ=0, σ=1 で 0。0 に張り付いたら事後崩壊',
+    },
+  ],
 });
 
 function reset() {
@@ -119,6 +151,13 @@ function render() {
     pick: state.pick,
   });
   chart.draw(hist);
+  if (vae.last) {
+    formula.update({
+      rec: vae.last.recon, beta: state.cfg.beta, kl: vae.last.kl,
+      tot: vae.last.recon + state.cfg.beta * vae.last.kl,
+      mse: vae.last.mse, sx: state.cfg.sigmaX, kl2: vae.last.kl,
+    });
+  }
   $('stStep').textContent = vae.step.toLocaleString();
   if (vae.last) {
     $('stMse').textContent = Math.sqrt(vae.last.mse).toFixed(3);
@@ -257,6 +296,21 @@ function init() {
   window.addEventListener('resize', render);
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { refreshDensity(true); render(); });
 
+  formula.linkSources({
+    '.stage-head .legend span:nth-child(1)': ['rec', 'mse'],
+    '.stage-head .legend span:nth-child(2)': ['tot'],
+    '#latent': ['kl', 'kl2'],
+    '.side .chart-head .legend span:nth-child(1)': ['rec', 'mse'],
+    '.side .chart-head .legend span:nth-child(2)': ['beta', 'kl'],
+    '#chartLoss': ['tot'],
+    '.stats .stat:nth-child(3)': ['mse', 'rec'],
+    '.stats .stat:nth-child(4)': ['kl', 'kl2'],
+    '.controls section:nth-child(2) .field:nth-child(2)': ['beta'],
+    '.controls section:nth-child(2) .field:nth-child(4)': ['sx'],
+  });
+
+  codeBox($('vaeCode'), { items: VAE_CODE });
+  enableGlossary();
   reset();
   setRunning(false);
   render();

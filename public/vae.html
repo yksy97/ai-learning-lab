@@ -112,6 +112,12 @@
       </div>
 
       <div class="panel">
+        <h2>式で見る <span class="hint">項にマウスを乗せると対応する場所が光る</span></h2>
+        <div id="vaeFormula"></div>
+        <p class="f-hint">逆に、<b>凡例・潜在空間・β や σₓ のつまみ・グラフをクリック</b>すると、それが式のどの項かが光ります。</p>
+      </div>
+
+      <div class="panel">
         <div class="chart-head">
           <h2>2つの損失の綱引き</h2>
           <div class="legend">
@@ -151,6 +157,8 @@
       </div>
     </div>
   </section>
+
+  <section class="panel guide" id="vaeCode"></section>
 
   <footer class="foot">キー操作：Space 再生/停止 ・ S 1ステップ ・ R リセット　|　損失 = 再構成誤差 / (2σₓ²) + β × KL(q(z|x) ‖ N(0, I))</footer>
 

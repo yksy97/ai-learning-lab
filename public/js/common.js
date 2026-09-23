@@ -1,5 +1,6 @@
 // ページ共通：ナビゲーション、URL パラメータ、学習履歴
 import { DATASETS } from './datasets.js';
+import { attachGlossary } from './glossary.js';
 
 /** URL の ?dataset= を読み、なければ既定値 */
 export function initialDataset(fallback) {
@@ -72,6 +73,12 @@ export const MODELS = [
     tagline: '図書館の司書と作家。質問に関係する資料を探してから答える' },
   { id: 'compare', label: '比較', detail: 'compare.html', kind: 'まとめ',
     tagline: '同じデータを GAN・Transformer・VAE に学習させて並べる' },
+  { id: 'learn', label: '学習パス', detail: 'learn.html', kind: '学ぶ',
+    tagline: '第0層（数学の道具）から実用までの順路。進捗と復習を記録する' },
+  { id: 'glossary', label: '用語と記号', detail: 'glossary.html', kind: '学ぶ',
+    tagline: '用語を「意味・たとえ・記号・式」で引く。記号の読み方も' },
+  { id: 'drills', label: 'ドリル', detail: 'drills.html', kind: '学ぶ',
+    tagline: 'softmax・コサイン類似度・交差エントロピー・KL を小さい数字で手計算する' },
 ];
 
 /**
@@ -99,4 +106,29 @@ export function mountHeader(opt = {}) {
     <nav class="tabs" aria-label="モデル">${tabs}</nav>
     ${sub}
     ${opt.sub ? `<p class="sub">${opt.sub}</p>` : ''}`;
+}
+
+
+/**
+ * 本文中の専門用語を自動でカードにする。
+ * ガイドのように中身が差し替わるページでも効くよう、変化を見て貼り直す。
+ */
+export function enableGlossary(selectors = ['.story-body', '.term', '.guide', '.hero', '.note', '.answer', '.gl-body']) {
+  const run = () => {
+    for (const sel of selectors) {
+      for (const el of document.querySelectorAll(sel)) {
+        // 文字の長さを目印にする（リンクを貼っても本文の長さは変わらない）
+        const sig = String(el.textContent.length);
+        if (el.dataset.glSig === sig) continue;
+        attachGlossary(el);
+        el.dataset.glSig = String(el.textContent.length);
+      }
+    }
+  };
+  run();
+  let timer = null;
+  new MutationObserver(() => {
+    clearTimeout(timer);
+    timer = setTimeout(run, 150);
+  }).observe(document.body, { childList: true, subtree: true });
 }

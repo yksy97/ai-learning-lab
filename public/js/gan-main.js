@@ -3,7 +3,10 @@ import { GAN, DEFAULTS } from './gan.js';
 import { DATASETS } from './datasets.js';
 import { mulberry32, gaussian } from './nn.js';
 import { SpaceView, LineChart, drawLatent, zColor } from './viz.js';
-import { History, initialDataset, syncDataset, fillDatasetSelect , mountHeader } from './common.js';
+import { History, initialDataset, syncDataset, fillDatasetSelect, mountHeader, enableGlossary } from './common.js';
+import { LiveFormula } from './formula.js';
+import { codeBox } from './codebox.js';
+import { GAN_CODE } from './code-snippets.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -89,6 +92,36 @@ const chartD = new LineChart($('chartD'), {
   refs: [{ y: 0.5 }],
 });
 
+const formula = new LiveFormula($('ganFormula'), {
+  rows: [
+    {
+      label: 'D の損失',
+      tpl: 'L_D = −log D(x) − log(1 − D(G(z))) = −log {{dr}} − log(1 − {{df}}) = {{ld}}',
+      slots: {
+        dr: { hl: 'real', tip: '本物への判定の平均 D(x)' },
+        df: { hl: 'fake', tip: '生成への判定の平均 D(G(z))' },
+        ld: { hl: '#chartLoss', tip: 'グラフの緑の線' },
+      },
+      note: '均衡（D = 0.5）なら 2 × log 2 = 1.386',
+    },
+    {
+      label: 'G の損失',
+      tpl: 'L_G = −log D(G(z)) = −log {{df2}} = {{lg}}',
+      slots: {
+        df2: { hl: 'fake', tip: '生成への判定の平均。1 に近づけたい' },
+        lg: { hl: '#chartLoss', tip: 'グラフの紫の線' },
+      },
+      note: '非飽和損失。均衡なら log 2 = 0.693',
+    },
+  ],
+  onHighlight: (target, on) => {
+    if (target === 'real' || target === 'fake') {
+      state.emphasis = on ? target : null;
+      render(true);
+    }
+  },
+});
+
 function render(force = false) {
   const n = N_VIEW;
   const fake = gan.generate(viewZ, n);
@@ -102,6 +135,7 @@ function render(force = false) {
   }
 
   space.draw({
+    emphasis: state.emphasis,
     show: state.show,
     real: realView,
     fake,
@@ -123,6 +157,10 @@ function render(force = false) {
 
   $('stStep').textContent = gan.step.toLocaleString();
   if (gan.last) {
+    formula.update({
+      dr: gan.last.dReal, df: gan.last.dFake, ld: gan.last.lossD,
+      df2: gan.last.dFake, lg: gan.last.lossG,
+    });
     $('stDReal').textContent = gan.last.dReal.toFixed(2);
     $('stDFake').textContent = gan.last.dFake.toFixed(2);
   } else {
@@ -246,6 +284,30 @@ function init() {
   window.addEventListener('resize', () => render(true));
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => render(true));
 
+  // 画面 → 式の逆引き
+  formula.linkSources({
+    '.stage-head .legend span:nth-child(1)': ['dr'],
+    '.stage-head .legend span:nth-child(2)': ['df', 'df2'],
+    '.stage-head .legend span:nth-child(3)': ['dr', 'df'],
+    '.stats .stat:nth-child(3)': ['dr'],
+    '.stats .stat:nth-child(4)': ['df', 'df2'],
+    '#chartLoss': ['ld', 'lg'],
+  });
+  // キャンバスをクリックしたら、近いのが本物か生成かで式の項を示す
+  $('main').addEventListener('click', (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const [x, y] = space.toWorld(e.clientX - rect.left, e.clientY - rect.top);
+    const near = (arr) => {
+      let best = Infinity;
+      for (let i = 0; i < arr.length / 2; i++) best = Math.min(best, Math.hypot(arr[2 * i] - x, arr[2 * i + 1] - y));
+      return best;
+    };
+    const fake = gan.generate(viewZ, N_VIEW);
+    formula.focus(near(realView) <= near(fake) ? ['dr'] : ['df', 'df2']);
+  });
+
+  codeBox($('ganCode'), { items: GAN_CODE });
+  enableGlossary();
   reset();
   setRunning(false);
   requestAnimationFrame(loop);

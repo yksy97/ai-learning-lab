@@ -8,7 +8,7 @@ import { SpaceView, LineChart } from './viz.js';
 import { ARSpaceView } from './ar-viz.js';
 import { VAESpaceView } from './vae-viz.js';
 import { precisionRecall, modesCovered } from './metrics.js';
-import { History, initialDataset, syncDataset, fillDatasetSelect , mountHeader } from './common.js';
+import { History, initialDataset, syncDataset, fillDatasetSelect, mountHeader, enableGlossary } from './common.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -205,6 +205,7 @@ function init() {
   window.addEventListener('resize', render);
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { refreshAR(); refreshGAN(true); refreshVAE(true); render(); });
 
+  enableGlossary();
   reset();
   setRunning(false);
   requestAnimationFrame(loop);

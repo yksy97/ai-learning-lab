@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ML Visualizer · ドリル</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='6' width='20' height='20' rx='3' fill='%23199e70'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="top"><div id="nav"></div></header>
+
+  <main class="home">
+    <section class="panel hero">
+      <h2 class="hero-title">式は、1回だけ手で計算すると腑に落ちる</h2>
+      <p>読むだけでは式は身につきません。小さい数字で1問やると、記号の並びが「手順」に変わります。
+        数字は毎回変わるので、答えではなく手順を覚えることになります。電卓を使ってかまいません。</p>
+    </section>
+
+    <div class="drill-tabs" id="tabs"></div>
+
+    <section class="panel">
+      <h2 id="drillTitle"></h2>
+      <p class="note" id="drillIntro"></p>
+      <div class="drill">
+        <div class="drill-q" id="q"></div>
+        <div class="mono" id="formula" style="color:var(--muted)"></div>
+        <div class="drill-inputs" id="inputs"></div>
+        <div class="drill-actions">
+          <button id="check" class="act">答え合わせ</button>
+          <button id="steps">途中式を見る</button>
+          <button id="next">別の問題</button>
+        </div>
+        <div class="drill-result" id="result"></div>
+        <div class="drill-steps" id="stepBox" hidden></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>この5問が効く理由</h2>
+      <div class="guide-grid">
+        <div><h3>softmax</h3><p>Transformer が次を選ぶところ。アテンションの中にも出てくる。</p></div>
+        <div><h3>コサイン類似度</h3><p>RAG の検索そのもの。ベクトルの「向き」を比べるという感覚がつかめる。</p></div>
+        <div><h3>交差エントロピー</h3><p>分類も言語モデルもこれ。損失が「正解の確率の log」だと分かる。</p></div>
+        <div><h3>KL と GAN の損失</h3><p>VAE と GAN の心臓部。画面に出ている数字が、自分で計算できる数字になる。</p></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">答えは小数第2位まで。許容誤差は少し広めにしてあります</footer>
+
+  <script type="module">
+    import { DRILLS } from './js/drills.js';
+    import { mountHeader, enableGlossary } from './js/common.js';
+    import { recordQuiz, quizStats } from './js/progress.js';
+
+    mountHeader({ id: 'drills', mode: 'detail', sub: '小さい数字で式を1回手計算する。数字は毎回変わる' });
+
+    let current = DRILLS[0];
+    let problem = null;
+
+    const $ = (id) => document.getElementById(id);
+    $('tabs').innerHTML = DRILLS.map((d) => `<button data-id="${d.id}" aria-pressed="${d.id === current.id}">${d.label}</button>`).join('');
+    $('tabs').addEventListener('click', (e) => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      current = DRILLS.find((d) => d.id === b.dataset.id);
+      for (const x of $('tabs').querySelectorAll('button')) x.setAttribute('aria-pressed', String(x.dataset.id === current.id));
+      newProblem();
+    });
+
+    function newProblem() {
+      problem = current.make();
+      $('drillTitle').textContent = current.label;
+      $('drillIntro').textContent = current.intro;
+      $('q').innerHTML = problem.question;
+      $('formula').textContent = problem.formula;
+      $('inputs').innerHTML = problem.inputs
+        .map((inp, i) => `<label>${inp.label}<input type="text" inputmode="decimal" data-i="${i}" autocomplete="off" /></label>`).join('');
+      $('result').textContent = '';
+      $('result').className = 'drill-result';
+      $('stepBox').hidden = true;
+      $('stepBox').innerHTML = problem.steps.map((s) => `<div>${s}</div>`).join('');
+      $('inputs').querySelector('input')?.focus();
+    }
+
+    function check() {
+      const inputs = [...$('inputs').querySelectorAll('input')];
+      let ok = true, any = false;
+      for (const el of inputs) {
+        const spec = problem.inputs[+el.dataset.i];
+        const v = parseFloat(el.value);
+        if (Number.isNaN(v)) { ok = false; continue; }
+        any = true;
+        if (Math.abs(v - spec.answer) > spec.tol) ok = false;
+      }
+      if (!any) { $('result').textContent = '数字を入れてから押してください。'; $('result').className = 'drill-result'; return; }
+      recordQuiz(`drill:${current.id}`, ok);
+      const answers = problem.inputs.map((s) => `${s.label} = ${s.answer.toFixed(3)}`).join('、');
+      $('result').textContent = ok ? `正解。（${answers}）` : `惜しい。正解は ${answers}。「途中式を見る」で確認できます。`;
+      $('result').className = `drill-result ${ok ? 'ok' : 'ng'}`;
+      if (!ok) $('stepBox').hidden = false;
+      const st = quizStats();
+      document.querySelector('.foot').textContent =
+        `これまでの正解率 ${st.tries ? Math.round((st.correct / st.tries) * 100) : 0}%（${st.correct} / ${st.tries} 問）`;
+    }
+
+    $('check').addEventListener('click', check);
+    $('next').addEventListener('click', newProblem);
+    $('steps').addEventListener('click', () => { $('stepBox').hidden = !$('stepBox').hidden; });
+    $('inputs').addEventListener('keydown', (e) => { if (e.key === 'Enter') check(); });
+
+    newProblem();
+    enableGlossary(['.hero', '.guide', '.note', '.drill-q', '.drill-steps']);
+  </script>
+</body>
+</html>

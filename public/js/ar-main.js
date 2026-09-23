@@ -4,7 +4,10 @@ import { DATASETS } from './datasets.js';
 import { mulberry32 } from './nn.js';
 import { LineChart } from './viz.js';
 import { ARSpaceView } from './ar-viz.js';
-import { History, initialDataset, syncDataset, fillDatasetSelect , mountHeader } from './common.js';
+import { History, initialDataset, syncDataset, fillDatasetSelect, mountHeader, enableGlossary } from './common.js';
+import { LiveFormula } from './formula.js';
+import { codeBox } from './codebox.js';
+import { AR_CODE } from './code-snippets.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -69,6 +72,39 @@ const chart = new LineChart($('chartNll'), {
   fmt: (v) => v.toFixed(2),
 });
 
+const formula = new LiveFormula($('arFormula'), {
+  rows: [
+    {
+      label: '連鎖',
+      tpl: 'p(x) = p(t₁) · p(t₂|t₁) · p(t₃|t₁,t₂) · p(t₄|…) = {{p1}} × {{p2}} × {{p3}} × {{p4}} = {{px}}',
+      slots: {
+        p1: { hl: '#genRows', tip: '1つ目のトークンの確率' },
+        p2: { hl: '#genRows', tip: '1つ目を見たうえでの2つ目の確率' },
+        p3: { hl: '#genRows', tip: '3つ目' },
+        p4: { hl: '#genRows', tip: '4つ目' },
+        px: { hl: '#main', tip: 'このマスの確率。背景の濃さ' },
+      },
+      note: '下の「1点ずつ生成する」で選んだトークン列の確率',
+    },
+    {
+      label: '損失',
+      tpl: 'NLL = −log p(x) = {{nll}}　／　下限（データのエントロピー） = {{h}}',
+      slots: {
+        nll: { hl: '#chartNll', tip: '小さいほど、正解に高い確率を与えられている' },
+        h: { hl: '#chartNll', tip: 'どんなモデルでもこれより下がらない' },
+      },
+    },
+    {
+      label: '注意',
+      tpl: 'Attention(Q,K,V) = softmax(QKᵀ / √d) V　　d = {{d}}、ヘッド数 = {{heads}}',
+      slots: {
+        d: { hl: '#attn', tip: '埋め込みの次元' },
+        heads: { hl: '#attn', tip: '同時に走る「蛍光ペン」の本数' },
+      },
+    },
+  ],
+});
+
 function genOverlay() {
   const g = state.gen;
   if (!g.length && !state.genTimer && !state.genArmed) return null;
@@ -85,6 +121,17 @@ function render() {
   space.draw({ show: state.show, real: realView, samples, gen: genOverlay(), trail: state.trail });
   chart.opt.refs = [{ y: model.entropy }];
   chart.draw(hist);
+  const g = state.gen;
+  const probs = [0, 1, 2, 3].map((k) => (k < g.length ? model.conditional(g.slice(0, k), model.tables)[g[k]] : NaN));
+  const px = probs.every((v) => !Number.isNaN(v)) ? probs.reduce((a, b) => a * b, 1) : NaN;
+  const nd = (v) => (Number.isNaN(v) ? '–' : v);
+  const tail = hist.points[hist.points.length - 1];
+  formula.update({
+    p1: nd(probs[0]), p2: nd(probs[1]), p3: nd(probs[2]), p4: nd(probs[3]),
+    px: Number.isNaN(px) ? '–' : px.toExponential(2),
+    nll: tail ? tail.nll : '–', h: model.entropy,
+    d: state.cfg.d, heads: state.cfg.heads,
+  });
   $('stStep').textContent = model.step.toLocaleString();
   const last = hist.points[hist.points.length - 1];
   $('stNll').textContent = last ? last.nll.toFixed(2) : '–';
@@ -321,6 +368,17 @@ function init() {
   window.addEventListener('resize', render);
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { space.updateDensity(model.tables.density); render(); });
 
+  formula.linkSources({
+    '#genRows': ['p1', 'p2', 'p3', 'p4'],
+    '#attn': ['d', 'heads'],
+    '#chartNll': ['nll', 'h'],
+    '.stats .stat:nth-child(3)': ['nll'],
+    '.stats .stat:nth-child(4)': ['h'],
+  });
+  $('main').addEventListener('click', () => formula.focus(['px']));
+
+  codeBox($('arCode'), { items: AR_CODE });
+  enableGlossary();
   reset();
   setRunning(false);
   requestAnimationFrame(loop);

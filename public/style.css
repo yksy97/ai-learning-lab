@@ -366,3 +366,144 @@ textarea {
 .out-row .sc { text-align: right; color: var(--text-2); font-variant-numeric: tabular-nums; }
 .out-row .t { font-size: 12px; color: var(--text-2); }
 .out-row.on .t { color: var(--text); }
+
+/* ---- 用語カード ---- */
+.term-link {
+  border-bottom: 1px dashed var(--accent); cursor: help; color: inherit;
+}
+.term-link:hover { background: color-mix(in oklab, var(--accent) 14%, transparent); }
+.term-card {
+  position: fixed; z-index: 50; max-width: 340px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
+  box-shadow: 0 10px 30px rgb(0 0 0 / .25); font-size: 12.5px; line-height: 1.7;
+}
+.tc-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+.tc-head b { font-size: 14px; }
+.tc-head span { font-size: 11px; color: var(--muted); }
+.tc-row { display: grid; grid-template-columns: 42px 1fr; gap: 8px; margin-top: 4px; }
+.tc-k { color: var(--muted); font-size: 11px; padding-top: 2px; }
+.tc-foot { margin-top: 8px; border-top: 1px solid var(--border); padding-top: 6px; }
+.tc-foot a, .tc-row a { color: var(--accent); font-size: 12px; text-decoration: none; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+
+/* ---- 用語辞典・記号ページ ---- */
+.gl-filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.gl-filters button { font-size: 12px; padding: 5px 11px; border-radius: 999px; }
+.gl-filters button[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.gl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
+.gl-item { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; background: var(--surface); }
+.gl-item h3 { font-size: 14px; margin: 0 0 2px; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.gl-item h3 span { font-size: 11px; color: var(--muted); font-weight: 400; }
+.gl-item .gl-body { font-size: 12.5px; color: var(--text-2); line-height: 1.7; }
+.gl-item .gl-body b { color: var(--text); }
+.gl-item dl { display: grid; grid-template-columns: 40px 1fr; gap: 2px 8px; margin: 6px 0 0; }
+.gl-item dt { font-size: 11px; color: var(--muted); }
+.gl-item dd { margin: 0; font-size: 12.5px; }
+.sym-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.sym-table th { text-align: left; font-size: 11px; color: var(--muted); font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+.sym-table td { padding: 7px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.sym-table td:first-child { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 15px; white-space: nowrap; }
+.sym-table td:nth-child(2) { color: var(--text-2); white-space: nowrap; }
+.sym-table td:last-child { color: var(--text-2); font-size: 12.5px; }
+
+/* ---- 生きた数式 ---- */
+.formula-box { display: grid; gap: 8px; }
+.f-row { display: grid; grid-template-columns: 74px 1fr; gap: 8px; align-items: baseline; font-size: 13px; }
+.f-label { font-size: 11px; color: var(--muted); }
+.f-body {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; line-height: 1.9;
+  color: var(--text-2); word-break: break-word;
+}
+.f-note { grid-column: 2; font-size: 11px; color: var(--muted); }
+.f-val {
+  color: var(--text); background: var(--surface-2); border-radius: 4px; padding: 0 4px;
+  cursor: help; font-variant-numeric: tabular-nums; border-bottom: 1px solid var(--border);
+}
+.f-val:hover, .f-val.f-active { background: var(--accent); color: #fff; }
+.hl-target { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
+
+/* ---- コード対応表 ---- */
+.codebox { border-top: 1px solid var(--border); padding: 8px 0; }
+.codebox summary { cursor: pointer; font-size: 13px; color: var(--text); }
+.codebox summary::marker { color: var(--muted); }
+.cb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
+.cb-grid h4 { font-size: 11px; color: var(--muted); margin: 0 0 4px; font-weight: 600; }
+.cb-grid .prompt { max-height: 260px; }
+@media (max-width: 860px) { .cb-grid { grid-template-columns: 1fr; } }
+
+/* ---- クイズ ---- */
+.quiz { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; background: var(--surface-2); }
+.q-head { font-size: 11px; color: var(--muted); margin-bottom: 5px; }
+.q-body { font-size: 13px; line-height: 1.7; margin-bottom: 8px; }
+.q-options { display: grid; gap: 5px; }
+.q-options button { text-align: left; font-size: 12.5px; padding: 6px 10px; background: var(--surface); }
+.q-options button.correct { border-color: var(--ar); background: color-mix(in oklab, var(--ar) 18%, var(--surface)); }
+.q-options button.wrong { border-color: var(--fake); background: color-mix(in oklab, var(--fake) 18%, var(--surface)); }
+.q-options button:disabled { opacity: 1; cursor: default; }
+.q-feedback { margin-top: 8px; font-size: 12.5px; line-height: 1.7; color: var(--text-2); }
+.q-feedback b { color: var(--text); }
+
+/* ---- ドリル ---- */
+.drill { display: grid; gap: 10px; }
+.drill-q { font-size: 14px; line-height: 1.8; }
+.drill-q .mono { font-size: 13px; }
+.drill-inputs { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+.drill-inputs label { font-size: 12px; color: var(--text-2); }
+.drill-inputs input { width: 110px; display: block; margin-top: 3px; font: inherit; font-size: 13px;
+  padding: 5px 7px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); }
+.drill-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.drill-result { font-size: 13px; }
+.drill-result.ok { color: var(--ar); }
+.drill-result.ng { color: var(--fake); }
+.drill-steps { border-left: 2px solid var(--border); padding-left: 12px; display: grid; gap: 6px; }
+.drill-steps div { font-size: 12.5px; color: var(--text-2); line-height: 1.7; }
+.drill-steps .mono { color: var(--text); }
+.drill-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.drill-tabs button[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+/* ---- 学習パス ---- */
+.path { display: grid; gap: 10px; }
+.path-item { display: grid; grid-template-columns: 26px 1fr; gap: 10px; border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 12px; background: var(--surface); align-items: start; }
+.path-item.done { background: color-mix(in oklab, var(--ar) 8%, var(--surface)); border-color: color-mix(in oklab, var(--ar) 40%, var(--border)); }
+.path-item input { width: 16px; height: 16px; margin-top: 3px; accent-color: var(--ar); }
+.path-item h3 { font-size: 14px; margin: 0 0 3px; }
+.path-item p { margin: 0 0 6px; font-size: 12.5px; color: var(--text-2); line-height: 1.7; }
+.path-links { display: flex; gap: 10px; flex-wrap: wrap; font-size: 12px; }
+.path-links a { color: var(--accent); text-decoration: none; }
+.path-progress { display: flex; align-items: center; gap: 10px; margin: 6px 0 14px; }
+.path-progress .gauge { flex: 1; }
+.review-card { display: grid; gap: 8px; }
+.review-q { font-size: 15px; font-weight: 600; }
+.review-a { font-size: 13px; color: var(--text-2); line-height: 1.8; }
+
+/* 細い列に置いた式は、ラベルを上に積む */
+.side .f-row { grid-template-columns: 1fr; gap: 2px; }
+.side .f-note { grid-column: 1; }
+
+@media (max-width: 560px) {
+  .sym-table { display: block; overflow-x: auto; }
+  .sym-table td:last-child { min-width: 180px; }
+}
+
+/* hidden 属性が display 指定に負けないようにする */
+[hidden] { display: none !important; }
+
+/* 画面 → 式の逆引き */
+.f-source { cursor: pointer; position: relative; }
+.f-source:hover { outline: 1px dashed var(--accent); outline-offset: 3px; border-radius: 6px; }
+.f-flash {
+  background: var(--accent) !important; color: #fff !important;
+  animation: f-pulse 2.2s ease-out;
+}
+@keyframes f-pulse {
+  0%, 20% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 70%, transparent); }
+  60% { box-shadow: 0 0 0 8px color-mix(in oklab, var(--accent) 0%, transparent); }
+  100% { box-shadow: none; }
+}
+.f-hint { font-size: 11px; color: var(--muted); margin-top: 6px; }
+
+.q-why { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); color: var(--muted); }
+
+.reveal { border-left: 3px solid var(--accent); padding-left: 10px; margin-top: 10px; }
+.reveal p { margin: 0; }

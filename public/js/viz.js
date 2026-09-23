@@ -139,9 +139,11 @@ export class SpaceView {
 
     // 本物のサンプル
     const r = Math.max(2, w / 260);
+    const dimReal = s.emphasis && s.emphasis !== 'real' ? 0.15 : 1;
+    const dimFake = s.emphasis && s.emphasis !== 'fake' ? 0.15 : 1;
     if (s.show.real && s.real) {
       ctx.fillStyle = real;
-      ctx.globalAlpha = 0.55;
+      ctx.globalAlpha = 0.55 * dimReal;
       const n = s.real.length / 2;
       for (let i = 0; i < n; i++) {
         const [px, py] = this.toPx(s.real[2 * i], s.real[2 * i + 1]);
@@ -170,7 +172,9 @@ export class SpaceView {
         ctx.lineWidth = 1;
         ctx.strokeStyle = surface;
         ctx.fillStyle = color;
+        ctx.globalAlpha = dimFake;
         ctx.beginPath(); ctx.arc(px, py, r + 0.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.globalAlpha = 1;
       }
       if (outside > 0) {
         const msg = `${s.fakeLabel || '生成点'}の ${Math.round((outside / n) * 100)}% が表示範囲外（縁の○）`;
