@@ -5,7 +5,11 @@ import { mulberry32, gaussian } from './nn.js';
 import { SpaceView } from './viz.js';
 import { modesCovered } from './metrics.js';
 
+import { mountHeader } from './common.js';
+
 const $ = (id) => document.getElementById(id);
+
+mountHeader({ id: 'gan', mode: 'guide', sub: '「偽札職人」と「警察」の2つの AI の勝負として、GAN のしくみを順番に見ていく' });
 const N = 500;
 const DATASET = 'ring8';
 

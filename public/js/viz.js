@@ -317,6 +317,13 @@ export class LineChart {
         if (this.opt.yMin == null) yMin = Math.min(yMin, v);
         if (this.opt.yMax == null) yMax = Math.max(yMax, v);
       }
+      if (this.opt.yMax == null && this.opt.robustY && pts.length > 5) {
+        // 学習初期の極端な値でグラフが潰れないよう、上限は 95 パーセンタイルにする
+        const vals = [];
+        for (const p of pts) for (const s of series) vals.push(p[s.key]);
+        vals.sort((a, b) => a - b);
+        yMax = vals[Math.floor(vals.length * 0.95)];
+      }
       for (const r of refs) { if (this.opt.yMax == null) yMax = Math.max(yMax, r.y); }
       if (!isFinite(yMin)) { yMin = 0; yMax = 1; }
       if (this.opt.yMin == null) yMin = Math.max(0, yMin - 0.05 * (yMax - yMin));

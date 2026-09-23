@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ML Visualizer · RAG</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='5' y='7' width='9' height='18' rx='1' fill='%233987e5'/%3E%3Crect x='18' y='7' width='9' height='18' rx='1' fill='%23d95926' fill-opacity='.85'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="top">
+    <div id="nav"></div>
+  </header>
+
+  <main class="rag-layout">
+    <aside class="panel controls">
+      <section>
+        <h2>質問</h2>
+        <textarea id="question" rows="3" placeholder="社内規程について質問を書く"></textarea>
+        <div class="gen-actions" style="margin-top:8px">
+          <button id="ask" class="act">検索する</button>
+        </div>
+        <p class="note">例を押すとそのまま試せます。</p>
+        <div id="presets" class="presets"></div>
+      </section>
+
+      <section>
+        <h2>検索の設定</h2>
+        <label class="field">取り出す件数 k <output id="kOut"></output>
+          <input type="range" id="k" min="1" max="5" step="1" value="3" />
+        </label>
+        <label class="field">採用する最低の類似度 <output id="thOut"></output>
+          <input type="range" id="th" min="0" max="40" step="1" value="20" />
+        </label>
+        <p class="note">これを下回る資料しかないときは「資料に記載がない」と答えるべき場面です。</p>
+        <label class="field">資料の分け方
+          <select id="chunkMode">
+            <option value="doc">条文ごと（大きめ）</option>
+            <option value="sentence">文ごと（小さめ）</option>
+          </select>
+        </label>
+        <label class="field">語の重み
+          <select id="weighting">
+            <option value="tfidf">TF-IDF（珍しい語を重く）</option>
+            <option value="count">出現回数だけ</option>
+          </select>
+        </label>
+        <label class="check"><input type="checkbox" id="expand" checked /> 言い換えを考慮する</label>
+        <p class="note">本物の RAG は「意味のベクトル（埋め込み）」で言い換えを吸収します。ここでは小さな言い換え表で代用しています。</p>
+      </section>
+
+      <section>
+        <h2>資料</h2>
+        <p class="note" id="corpusNote"></p>
+        <p class="note">架空の会社「みなと物流株式会社」の社内規程です。内容はすべて架空のものです。</p>
+      </section>
+    </aside>
+
+    <section class="rag-main">
+      <div class="panel">
+        <div class="stage-head">
+          <h2>資料の地図</h2>
+          <div class="legend">
+            <span><i class="dot query"></i>質問</span>
+            <span><i class="dot accent"></i>取り出した資料</span>
+            <span><i class="dot muted"></i>その他の資料</span>
+          </div>
+        </div>
+        <div class="canvas-wrap map"><canvas id="map" aria-label="資料と質問の地図"></canvas><div id="mapTip" class="tip" hidden></div></div>
+      </div>
+
+      <div class="panel">
+        <h2>回答 <span class="hint" id="answerHint"></span></h2>
+        <div id="answer" class="answer">質問を入力して「検索する」を押してください。</div>
+        <p class="note">本物の RAG では、ここを LLM が資料を読んで書きます。この画面には LLM が入っていないので、代わりに<b>取り出した資料から関係の深い文をそのまま抜き出して</b>並べています。</p>
+      </div>
+
+      <div class="panel">
+        <h2>LLM に渡すプロンプト <span class="hint">検索結果を詰め込んだもの</span></h2>
+        <pre id="prompt" class="prompt">（まだありません）</pre>
+      </div>
+    </section>
+
+    <section class="panel rag-side">
+      <h2>検索結果 <span class="hint">類似度の高い順</span></h2>
+      <div id="results" class="results"></div>
+    </section>
+  </main>
+
+  <section class="panel guide">
+    <h2>見方のポイント</h2>
+    <div class="guide-grid">
+      <div>
+        <h3>RAG は2段構え</h3>
+        <p>「探す（検索）」と「書く（LLM）」に分かれている。この画面が見せているのは前半の検索と、その結果をプロンプトに詰めるところ。ここが外れると、後半がどんなに賢くても正しく答えられない。</p>
+      </div>
+      <div>
+        <h3>k と類似度のバランス</h3>
+        <p>k を増やすと拾いこぼしは減るが、関係ない資料も混ざる。混ざるとプロンプトが長くなり、LLM が迷う原因になる。</p>
+      </div>
+      <div>
+        <h3>分け方で変わる</h3>
+        <p>資料を大きく分けると文脈が残るが、余計な部分も混ざる。小さく分けるとピンポイントになるが、前後の条件が切り離されて誤解のもとになる。</p>
+      </div>
+      <div>
+        <h3>資料にないことは答えない</h3>
+        <p>「育児休業は？」のように資料にない質問では、どの資料も類似度が低い。ここで無理に答えさせると、LLM が作り話をする（ハルシネーション）。</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">検索はすべてブラウザ内で計算（文字 2-gram ＋ TF-IDF ＋ コサイン類似度）</footer>
+
+  <script type="module" src="js/rag-main.js"></script>
+</body>
+</html>

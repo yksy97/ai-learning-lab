@@ -4,7 +4,7 @@ import { gaussian } from './nn.js';
 export const DATASETS = {
   gaussian: {
     label: '1つのガウス分布',
-    note: '最も簡単。G が位置と広がりを合わせていく様子が見やすい。',
+    note: '最も簡単な例。位置と広がりが合っていく様子が見やすい。',
     sample(r) {
       const x = gaussian(r), y = gaussian(r);
       return [0.6 + 0.35 * x + 0.15 * y, -0.4 + 0.25 * y];
@@ -13,7 +13,7 @@ export const DATASETS = {
   ring8: {
     label: '円周上の8つのガウス',
     modes: { centers: Array.from({ length: 8 }, (_, k) => [1.4 * Math.cos((k / 8) * Math.PI * 2), 1.4 * Math.sin((k / 8) * Math.PI * 2)]), radius: 0.25 },
-    note: 'モード崩壊の定番例。G が一部の山だけを行き来することがある。',
+    note: '8 つの山。取りこぼしが起きやすく、モデルの差が出やすい定番の例。',
     sample(r) {
       const k = Math.floor(r() * 8);
       const t = (k / 8) * Math.PI * 2;
@@ -23,7 +23,7 @@ export const DATASETS = {
   grid25: {
     label: '5×5 格子のガウス',
     modes: { centers: Array.from({ length: 25 }, (_, k) => [(Math.floor(k / 5) - 2) * 0.7, ((k % 5) - 2) * 0.7]), radius: 0.15 },
-    note: '25 個の山。すべてのモードを覆えるかが試される難しめの課題。',
+    note: '25 個の山。すべての山を覆えるかが試される難しめの課題。',
     sample(r) {
       const i = Math.floor(r() * 5) - 2, j = Math.floor(r() * 5) - 2;
       return [i * 0.7 + 0.04 * gaussian(r), j * 0.7 + 0.04 * gaussian(r)];
@@ -31,7 +31,7 @@ export const DATASETS = {
   },
   circle: {
     label: '円（リング）',
-    note: '連続した1次元の構造。潜在空間の格子がどう折り畳まれるかに注目。',
+    note: '連続した1次元の構造。潜在空間がどう折り畳まれるかに注目。',
     sample(r) {
       const t = r() * Math.PI * 2;
       const rad = 1.2 + 0.05 * gaussian(r);

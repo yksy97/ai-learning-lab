@@ -1,12 +1,14 @@
 {
-  "name": "gan-visualizer",
+  "name": "ml-visualizer",
   "version": "1.0.0",
-  "description": "ブラウザで GAN と自己回帰 Transformer の学習過程を可視化するローカルアプリ（依存ライブラリなし）",
+  "description": "AI のしくみ（GAN・VAE・自己回帰 Transformer・RAG）をブラウザ上で動かしながら可視化するローカルアプリ（依存ライブラリなし）",
   "type": "module",
   "private": true,
   "scripts": {
     "start": "node server.js",
-    "test": "node test/gan.test.js && node test/ar.test.js"
+    "test": "node test/gan.test.js && node test/ar.test.js && node test/vae.test.js && node test/rag.test.js"
   },
-  "engines": { "node": ">=18" }
+  "engines": {
+    "node": ">=18"
+  }
 }

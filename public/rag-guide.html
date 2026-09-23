@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ML Visualizer · RAG・図書館の司書</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='5' y='7' width='9' height='18' rx='1' fill='%233987e5'/%3E%3Crect x='18' y='7' width='9' height='18' rx='1' fill='%23d95926' fill-opacity='.85'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="top">
+    <div id="nav"></div>
+  </header>
+
+  <main class="guide-layout">
+    <section class="panel stage">
+      <div class="stage-head">
+        <h2 id="stageTitle">図書館</h2>
+        <div class="legend">
+          <span><i class="dot query"></i>質問</span>
+          <span><i class="dot accent"></i>司書が選んだ資料</span>
+          <span><i class="dot muted"></i>棚にある資料</span>
+        </div>
+      </div>
+      <div class="canvas-wrap map"><canvas id="map" aria-label="資料と質問の地図"></canvas></div>
+      <div id="output" class="rag-output"></div>
+    </section>
+
+    <aside class="panel story" aria-live="polite">
+      <div class="story-top">
+        <span id="stepNo" class="step-no"></span>
+        <div class="dots" id="dots"></div>
+      </div>
+      <h2 id="stepTitle" class="story-title"></h2>
+      <div id="stepBody" class="story-body"></div>
+      <div id="stepActions" class="story-actions"></div>
+      <div id="stepTerm" class="term"></div>
+      <div class="story-nav">
+        <button id="prev">← 前へ</button>
+        <button id="next" class="primary">次へ →</button>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="foot">キー操作：← → でページ移動　|　資料は架空の会社の社内規程（内容はすべて架空）</footer>
+
+  <script type="module" src="js/rag-guide-main.js"></script>
+</body>
+</html>

@@ -3,174 +3,70 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>GAN Visualizer</title>
+  <title>ML Visualizer</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='11' cy='16' r='7' fill='%233987e5'/%3E%3Ccircle cx='21' cy='16' r='7' fill='%23d95926' fill-opacity='.85'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header class="top">
-    <div>
-      <h1>GAN Visualizer</h1>
-      <nav class="tabs" aria-label="モード">
-        <a href="guide.html">はじめて（偽札と警察）</a>
-        <a href="index.html" aria-current="page">GAN</a>
-        <a href="ar.html">自己回帰 Transformer</a>
-        <a href="compare.html">比較</a>
-      </nav>
-      <p class="sub">Generator が「本物の分布」を真似し、Discriminator がそれを見破ろうとする攻防を 2 次元で観察する</p>
-    </div>
-    <div class="transport">
-      <button id="btnPlay" class="primary" title="再生 / 一時停止（Space）">▶ 学習開始</button>
-      <button id="btnStep" title="1ステップ進める（S）">1ステップ</button>
-      <button id="btnReset" title="重みを初期化（R）">リセット</button>
-    </div>
+    <div id="nav"></div>
   </header>
 
-  <main class="layout">
-    <!-- 操作パネル -->
-    <aside class="panel controls">
-      <section>
-        <h2>データ</h2>
-        <label class="field">本物の分布
-          <select id="dataset"></select>
-        </label>
-        <p id="datasetNote" class="note"></p>
-      </section>
-
-      <section>
-        <h2>学習</h2>
-        <label class="field">損失関数
-          <select id="loss">
-            <option value="nonsat">非飽和（−log D(G(z))・標準）</option>
-            <option value="minimax">ミニマックス（log(1−D(G(z)))・原論文）</option>
-          </select>
-        </label>
-        <label class="field">D の学習率 <output id="lrDOut"></output>
-          <input type="range" id="lrD" min="0" max="6" step="1" />
-        </label>
-        <label class="field">G の学習率 <output id="lrGOut"></output>
-          <input type="range" id="lrG" min="0" max="6" step="1" />
-        </label>
-        <label class="field">G 1回あたりの D 更新回数 <output id="dStepsOut"></output>
-          <input type="range" id="dSteps" min="1" max="5" step="1" />
-        </label>
-        <label class="field">バッチサイズ
-          <select id="batch">
-            <option>32</option><option>64</option><option>128</option><option>256</option>
-          </select>
-        </label>
-        <label class="field">速度（1フレームあたりのステップ数） <output id="speedOut"></output>
-          <input type="range" id="speed" min="1" max="40" step="1" value="8" />
-        </label>
-      </section>
-
-      <section>
-        <h2>ネットワーク <span class="hint">変更するとリセット</span></h2>
-        <label class="field">ノイズ z の次元
-          <select id="noiseDim"><option>1</option><option>2</option><option>4</option></select>
-        </label>
-        <label class="field">隠れ層のユニット数
-          <select id="hidden"><option>16</option><option>32</option><option>64</option></select>
-        </label>
-        <label class="field">隠れ層の数 <output id="depthOut"></output>
-          <input type="range" id="depth" min="1" max="4" step="1" />
-        </label>
-        <label class="field">乱数シード
-          <input type="number" id="seed" min="1" max="9999" step="1" />
-        </label>
-        <p class="note" id="paramCount"></p>
-      </section>
-
-      <section>
-        <h2>表示</h2>
-        <label class="check"><input type="checkbox" id="showHeat" checked /> D の判定（背景）</label>
-        <label class="check"><input type="checkbox" id="showReal" checked /> 本物のサンプル</label>
-        <label class="check"><input type="checkbox" id="showFake" checked /> 生成サンプル</label>
-        <label class="check"><input type="checkbox" id="showGrad" /> G への勾配（矢印）</label>
-        <label class="check"><input type="checkbox" id="showGrid" checked /> 潜在空間の格子の写像</label>
-        <label class="check"><input type="checkbox" id="colorByZ" /> 生成点を z で色分け</label>
-      </section>
-    </aside>
-
-    <!-- メインビュー -->
-    <section class="panel stage">
-      <div class="stage-head">
-        <h2>データ空間 <span class="hint">x = (x₁, x₂)</span></h2>
-        <div class="legend">
-          <span><i class="dot real"></i>本物</span>
-          <span><i class="dot fake"></i>生成（G(z)）</span>
-          <span class="ramp"><i class="bar"></i><em>D(x)=0 偽物っぽい</em><em>1 本物っぽい</em></span>
-        </div>
-      </div>
-      <div class="canvas-wrap square">
-        <canvas id="main" aria-label="データ空間の可視化"></canvas>
-        <div id="mainTip" class="tip" hidden></div>
-      </div>
+  <main class="home">
+    <section class="panel hero">
+      <h2 class="hero-title">AI のしくみを、動かしながら理解する</h2>
+      <p>機械学習のモデルをブラウザ上でその場で学習させ、中で何が起きているかを見るためのアプリです。
+        学習も推論もすべてブラウザ内の JavaScript で計算していて、外部ライブラリもサーバも使いません。</p>
+      <p>各モデルには <b>たとえ話ガイド</b>（紙芝居のように順番に見せる）と <b>詳細</b>（自由にいじれる画面）があります。
+        はじめてのモデルは、まずガイドから見るのがおすすめです。</p>
     </section>
 
-    <!-- 右列 -->
-    <section class="side">
-      <div class="panel stats">
-        <div class="stat"><span>ステップ</span><b id="stStep">0</b></div>
-        <div class="stat"><span>速度</span><b id="stRate">–</b></div>
-        <div class="stat"><span>D(本物)</span><b id="stDReal">–</b></div>
-        <div class="stat"><span>D(生成)</span><b id="stDFake">–</b></div>
-      </div>
+    <div id="cards"></div>
 
-      <div class="panel">
-        <h2>潜在空間 <span class="hint">z ～ N(0, I)（先頭2次元）</span></h2>
-        <div class="canvas-wrap square small"><canvas id="latent" aria-label="潜在空間"></canvas></div>
-        <p class="note">左の格子が G によって右のデータ空間へ折り曲げられて写される。</p>
-      </div>
-
-      <div class="panel">
-        <div class="chart-head">
-          <h2>損失</h2>
-          <div class="legend">
-            <span><i class="line lossD"></i>D の損失</span>
-            <span><i class="line lossG"></i>G の損失</span>
-          </div>
+    <section class="panel guide">
+      <h2>このアプリについて</h2>
+      <div class="guide-grid">
+        <div>
+          <h3>全部ブラウザの中</h3>
+          <p>ニューラルネットの順伝播・逆伝播・Adam、Transformer の注意機構まで手書きしている。学習は目の前で走っているので、設定を変えた結果がそのまま見える。</p>
         </div>
-        <div class="canvas-wrap chart"><canvas id="chartLoss" aria-label="損失の推移"></canvas><div class="tip" hidden></div></div>
-      </div>
-
-      <div class="panel">
-        <div class="chart-head">
-          <h2>D の出力（平均）</h2>
-          <div class="legend">
-            <span><i class="line real"></i>本物に対して</span>
-            <span><i class="line fake"></i>生成に対して</span>
-          </div>
+        <div>
+          <h3>たとえ話つき</h3>
+          <p>専門用語の前に、まず身近なたとえで全体像をつかむ。ガイドの各ステップには「専門用語では」の対応表がついている。</p>
         </div>
-        <div class="canvas-wrap chart"><canvas id="chartD" aria-label="Discriminator 出力の推移"></canvas><div class="tip" hidden></div></div>
+        <div>
+          <h3>失敗も見せる</h3>
+          <p>うまくいく例だけでなく、モード崩壊・勾配消失・事後崩壊など、教科書に出てくる失敗をその場で再現できる。</p>
+        </div>
+        <div>
+          <h3>小さく正しく</h3>
+          <p>2次元の点や小さな文書集という小さな題材にして、そのぶん中身を全部見せる。逆伝播は数値微分と一致することをテストで確認している。</p>
+        </div>
       </div>
     </section>
   </main>
 
-  <section class="panel guide">
-    <h2>見方のポイント</h2>
-    <div class="guide-grid">
-      <div>
-        <h3>背景の色 ＝ D の判定</h3>
-        <p>青い領域は D が「本物」、橙の領域は「偽物」と判定している場所。学習が進んで G が分布を真似できると、D は区別がつかなくなり背景は中間色（D(x)≈0.5）に近づく。</p>
-      </div>
-      <div>
-        <h3>矢印 ＝ G が動かされる方向</h3>
-        <p>D の判定を勾配として受け取り、生成点は「より本物っぽい」方向へ引っ張られる。G は本物のデータを直接見ておらず、D を通した勾配だけで学んでいる。</p>
-      </div>
-      <div>
-        <h3>モード崩壊を探す</h3>
-        <p>「円周上の8つのガウス」で G の学習率を上げると、生成点が一部の山だけに集まったり、山から山へ飛び移ったりすることがある。損失をミニマックスにすると、D が勝ちすぎて G が学べなくなる（勾配消失）様子も見られる。</p>
-      </div>
-      <div>
-        <h3>理想的な均衡</h3>
-        <p>G が完全に真似できたとき D(x)=0.5、D の損失は 2·ln2 ≈ 1.386、非飽和の G の損失は ln2 ≈ 0.693。グラフの点線がその値。GAN は振動しながら近づくのが普通。</p>
-      </div>
-    </div>
-  </section>
+  <footer class="foot">すべてブラウザ内の JavaScript で計算（外部ライブラリなし）</footer>
 
-  <footer class="foot">キー操作：Space 再生/停止 ・ S 1ステップ ・ R リセット　|　すべてブラウザ内の JavaScript で学習（外部ライブラリなし）</footer>
-
-  <script type="module" src="js/main.js"></script>
+  <script type="module">
+    import { MODELS, mountHeader } from './js/common.js';
+    mountHeader({ sub: '機械学習のモデルを、動かしながら見て理解するための可視化アプリ' });
+    const groups = [];
+    for (const m of MODELS) {
+      let g = groups.find((x) => x.kind === m.kind);
+      if (!g) groups.push((g = { kind: m.kind, items: [] }));
+      g.items.push(m);
+    }
+    document.getElementById('cards').innerHTML = groups.map((g) => `
+      <h2 class="group">${g.kind}</h2>
+      <div class="home-grid">
+        ${g.items.map((m) => `
+          <a class="panel card" href="${m.guide || m.detail}">
+            <h3>${m.label}</h3>
+            <p>${m.tagline}</p>
+            <span class="card-links">${m.guide ? '<b>たとえ話ガイド</b>' : ''}${m.guide && m.detail ? ' ・ ' : ''}${m.detail ? '詳細' : ''}</span>
+          </a>`).join('')}
+      </div>`).join('');
+  </script>
 </body>
 </html>

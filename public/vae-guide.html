@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ML Visualizer · VAE・模写職人</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='11' cy='16' r='7' fill='%233987e5'/%3E%3Ccircle cx='21' cy='16' r='7' fill='none' stroke='%239085e9' stroke-width='3'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="top">
+    <div id="nav"></div>
+  </header>
+
+  <main class="guide-layout">
+    <section class="panel stage">
+      <div class="stage-head">
+        <h2>絵の世界 <span class="hint">点の位置 ＝ 絵の特徴</span></h2>
+        <div class="legend">
+          <span><i class="dot real"></i>本物の絵</span>
+          <span><i class="dot ring"></i>描いた絵</span>
+        </div>
+      </div>
+      <div class="guide-two">
+        <div class="canvas-wrap square"><canvas id="main" aria-label="データ空間"></canvas></div>
+        <div class="latent-side">
+          <h3 class="mini-title">メモ帳（潜在空間）</h3>
+          <div class="canvas-wrap square"><canvas id="latent" aria-label="潜在空間"></canvas></div>
+          <p class="note" id="latentNote">まだメモを取っていません。</p>
+        </div>
+      </div>
+      <div class="meters">
+        <div class="meter"><span class="m-label">学習の回数</span><b id="mStep">0</b></div>
+        <div class="meter"><span class="m-label">復元のズレ <em>小さいほど上手に描き直せている</em></span><div class="gauge"><i id="mErrBar"></i></div><b id="mErr">–</b></div>
+        <div class="meter"><span class="m-label">メモの情報量（KL） <em>0 に近い＝メモが空っぽ</em></span><div class="gauge"><i id="mKlBar"></i></div><b id="mKl">–</b></div>
+      </div>
+    </section>
+
+    <aside class="panel story" aria-live="polite">
+      <div class="story-top">
+        <span id="stepNo" class="step-no"></span>
+        <div class="dots" id="dots"></div>
+      </div>
+      <h2 id="stepTitle" class="story-title"></h2>
+      <div id="stepBody" class="story-body"></div>
+      <div id="stepActions" class="story-actions"></div>
+      <div id="stepTerm" class="term"></div>
+      <div class="story-nav">
+        <button id="prev">← 前へ</button>
+        <button id="next" class="primary">次へ →</button>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="foot">キー操作：← → でページ移動 ・ Space で自動学習の再生/停止　|　ここでの VAE は「詳細」タブと同じもの（たとえ話で説明しているだけ）</footer>
+
+  <script type="module" src="js/vae-guide-main.js"></script>
+</body>
+</html>

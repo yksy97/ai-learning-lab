@@ -57,7 +57,7 @@ function listen(port, tries = 10) {
     }
   });
   server.listen(port, HOST, () => {
-    console.log(`\n  GAN Visualizer が起動しました → http://localhost:${port}\n  （停止は Ctrl + C）\n`);
+    console.log(`\n  ML Visualizer が起動しました → http://localhost:${port}\n  （停止は Ctrl + C）\n`);
   });
 }
 
