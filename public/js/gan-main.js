@@ -7,6 +7,9 @@ import { History, initialDataset, syncDataset, fillDatasetSelect, mountHeader, m
 import { LiveFormula } from './formula.js';
 import { codeBox } from './codebox.js';
 import { GAN_CODE } from './code-snippets.js';
+import { mountLab, thumb } from './lab.js';
+import { EXPERIMENTS } from './experiments.js';
+import { precisionRecall, modesCovered } from './metrics.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -171,16 +174,30 @@ function render(force = false) {
 
 function train(steps) {
   const t0 = performance.now();
+  let done = 0;
   for (let i = 0; i < steps; i++) {
     hist.push(gan.trainStep());
     state.rateSteps++;
+    done++;
     if (performance.now() - t0 > 22) break; // UI を固めない
   }
+  return done;
 }
 
 function loop() {
   state.frame++;
-  if (state.running) {
+  if (state.job) {
+    // 実験カードから頼まれたぶんを、UI を止めずに進める
+    const j = state.job;
+    j.done += train(80);
+    j.onProgress(Math.min(j.done, j.total));
+    render();
+    if (j.done >= j.total) {
+      state.job = null;
+      setRunning(false);
+      j.onDone();
+    }
+  } else if (state.running) {
     train(state.speed);
     render();
   }
@@ -307,11 +324,66 @@ function init() {
     formula.focus(near(realView) <= near(fake) ? ['dr'] : ['df', 'df2']);
   });
 
+  mountExperimentLab();
   codeBox($('ganCode'), { items: GAN_CODE });
   enableGlossary();
   reset();
   setRunning(false);
   requestAnimationFrame(loop);
+}
+
+// ---- 実験カード（予想 → 実験 → 観察 → 説明 → 比べる）----
+function mountExperimentLab() {
+  const el = document.createElement('section');
+  document.querySelector('header.top').insertAdjacentElement('afterend', el);
+  // 「このページのゴール」の下に置く
+  const goal = document.querySelector('.goal');
+  if (goal) goal.insertAdjacentElement('afterend', el);
+
+  // 実験の条件を、画面のつまみにも反映させる
+  const setUI = (cfg) => {
+    if (cfg.dataset) { $('dataset').value = cfg.dataset; $('datasetNote').textContent = DATASETS[cfg.dataset].note; syncDataset(cfg.dataset); }
+    if (cfg.loss) $('loss').value = cfg.loss;
+    for (const [id, key] of [['lrD', 'lrD'], ['lrG', 'lrG']]) {
+      if (cfg[key] != null) { $(id).value = LR_STEPS.indexOf(cfg[key]); $(`${id}Out`).textContent = String(cfg[key]); }
+    }
+    if (cfg.dSteps != null) { $('dSteps').value = cfg.dSteps; $('dStepsOut').textContent = String(cfg.dSteps); }
+    if (cfg.hidden != null) $('hidden').value = String(cfg.hidden);
+    if (cfg.depth != null) { $('depth').value = cfg.depth; $('depthOut').textContent = String(cfg.depth); }
+  };
+
+  mountLab(el, {
+    pageId: 'gan',
+    experiments: EXPERIMENTS.gan,
+    apply(cfg) {
+      Object.assign(state.cfg, cfg);
+      setUI(cfg);
+      reset();
+      setRunning(false);
+    },
+    run(steps, cb) {
+      state.job = { total: steps, done: 0, onProgress: cb.onProgress, onDone: cb.onDone };
+    },
+    stop() { state.job = null; setRunning(false); },
+    capture() {
+      const fake = gan.generate(viewZ, N_VIEW);
+      const pr = precisionRecall(realView, fake, N_VIEW, 3);
+      const mc = modesCovered(fake, N_VIEW, DATASETS[state.cfg.dataset].modes);
+      return {
+        img: thumb($('main')),
+        step: gan.step,
+        config: { dataset: state.cfg.dataset, lrG: state.cfg.lrG, lrD: state.cfg.lrD,
+                  dSteps: state.cfg.dSteps, loss: state.cfg.loss,
+                  hidden: state.cfg.hidden, depth: state.cfg.depth },
+        stats: [
+          { k: '覆えている山', v: mc ? `${mc.covered} / ${mc.total}` : '–' },
+          { k: '品質（precision）', v: `${Math.round(pr.precision * 100)}%` },
+          { k: '網羅性（recall）', v: `${Math.round(pr.recall * 100)}%` },
+          { k: 'D(本物) / D(生成)', v: gan.last ? `${gan.last.dReal.toFixed(2)} / ${gan.last.dFake.toFixed(2)}` : '–' },
+        ],
+      };
+    },
+  });
 }
 
 init();

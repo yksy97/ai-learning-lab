@@ -8,12 +8,14 @@ import { History, initialDataset, syncDataset, fillDatasetSelect, mountHeader, m
 import { LiveFormula } from './formula.js';
 import { codeBox } from './codebox.js';
 import { AR_CODE } from './code-snippets.js';
+import { mountLab, thumb } from './lab.js';
+import { EXPERIMENTS } from './experiments.js';
 
 const $ = (id) => document.getElementById(id);
 
 mountHeader({ id: 'ar', mode: 'detail', sub: '点をトークンの列に変えて、Transformer が「次の1つ」を予測することだけを繰り返します。競う相手はいません' });
 mountGoal('ar');
-const LR_STEPS = [0.0003, 0.001, 0.002, 0.003, 0.005, 0.01];
+const LR_STEPS = [0.0003, 0.001, 0.002, 0.003, 0.005, 0.01, 0.02];
 const N_VIEW = 500;
 const TABLE_INTERVAL = 300; // 学習中に確率表を作り直す間隔（ms）
 const GEN_DELAY = 650;      // 1点を生成するアニメーションの1トークンあたりの時間（ms）
@@ -234,16 +236,31 @@ function playGen() {
 // ---- 学習ループ ----
 function train(steps) {
   const t0 = performance.now();
+  let done = 0;
   for (let i = 0; i < steps; i++) {
     hist.push(model.trainStep());
     state.rateSteps++;
+    done++;
     if (performance.now() - t0 > 22) break;
   }
+  return done;
 }
 
 function loop() {
   const now = performance.now();
-  if (state.running) {
+  if (state.job) {
+    const j = state.job;
+    j.done += train(60);
+    j.onProgress(Math.min(j.done, j.total));
+    if (now - state.tablesT > TABLE_INTERVAL) refreshTables();
+    else render();
+    if (j.done >= j.total) {
+      state.job = null;
+      setRunning(false);
+      refreshTables();
+      j.onDone();
+    }
+  } else if (state.running) {
     train(state.speed);
     if (now - state.tablesT > TABLE_INTERVAL) refreshTables();
     else render();
@@ -378,11 +395,60 @@ function init() {
   });
   $('main').addEventListener('click', () => formula.focus(['px']));
 
+  mountExperimentLab();
   codeBox($('arCode'), { items: AR_CODE });
   enableGlossary();
   reset();
   setRunning(false);
   requestAnimationFrame(loop);
+}
+
+// ---- 実験カード ----
+function mountExperimentLab() {
+  const el = document.createElement('section');
+  const goal = document.querySelector('.goal') || document.querySelector('header.top');
+  goal.insertAdjacentElement('afterend', el);
+
+  const setUI = (cfg) => {
+    for (const k of ['d', 'heads', 'layers']) if (cfg[k] != null && $(k)) $(k).value = String(cfg[k]);
+    if (cfg.lr != null && $('lr')) {
+      const i = LR_STEPS.indexOf(cfg.lr);
+      if (i >= 0) { $('lr').value = i; if ($('lrOut')) $('lrOut').textContent = String(cfg.lr); }
+    }
+    if (cfg.dataset && $('dataset')) { $('dataset').value = cfg.dataset; syncDataset(cfg.dataset); }
+  };
+
+  mountLab(el, {
+    pageId: 'ar',
+    experiments: EXPERIMENTS.ar,
+    apply(cfg) {
+      Object.assign(state.cfg, cfg);
+      setUI(cfg);
+      reset();
+      setRunning(false);
+    },
+    run(steps, cb) { state.job = { total: steps, done: 0, onProgress: cb.onProgress, onDone: cb.onDone }; },
+    stop() { state.job = null; setRunning(false); },
+    capture() {
+      // 1回ぶんの NLL は揺れるので、直近の平均と揺れ幅で比べる
+      const pts = hist.points.slice(-24);
+      const avg = pts.length ? pts.reduce((a, p) => a + p.nll, 0) / pts.length : NaN;
+      const sd = pts.length > 1
+        ? Math.sqrt(pts.reduce((a, p) => a + (p.nll - avg) ** 2, 0) / pts.length) : NaN;
+      return {
+        img: thumb($('main')),
+        step: model.step,
+        config: { dataset: state.cfg.dataset, dModel: state.cfg.d, heads: state.cfg.heads,
+                  layers: state.cfg.layers, lr: state.cfg.lr },
+        stats: [
+          { k: 'NLL（直近の平均）', v: Number.isFinite(avg) ? avg.toFixed(3) : '–' },
+          { k: '下限との差', v: Number.isFinite(avg) ? (avg - model.entropy).toFixed(3) : '–' },
+          { k: 'NLL の揺れ', v: Number.isFinite(sd) ? `± ${sd.toFixed(3)}` : '–' },
+          { k: 'パラメータ数', v: model.net.paramCount().toLocaleString() },
+        ],
+      };
+    },
+  });
 }
 
 init();

@@ -625,3 +625,67 @@ textarea {
 .start-cta .note { text-align: center; margin: 0; }
 .start-sub { text-align: center; font-size: 12px; color: var(--accent); text-decoration: none; margin-top: 4px; }
 @media (max-width: 760px) { .start { grid-template-columns: 1fr; } }
+
+/* ---- 実験カード ---- */
+.lab { margin-bottom: 14px; }
+.lab-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 10px; }
+.lab-head h2 { margin: 0; font-size: 13px; color: var(--text); }
+.lab-tabs { display: flex; gap: 5px; flex-wrap: wrap; }
+.lab-tabs button { font-size: 12px; padding: 4px 11px; border-radius: 999px; }
+.lab-tabs button[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.lab-theme { margin: 0 0 6px; font-size: 15px; font-weight: 600; line-height: 1.6; }
+.lab-theme span {
+  font-size: 10px; font-weight: 700; color: var(--accent); letter-spacing: .06em;
+  display: inline-block; margin-right: 8px; vertical-align: 2px;
+}
+.lab-body { font-size: 13px; line-height: 1.85; color: var(--text-2); margin-bottom: 10px; max-width: 78ch; }
+.lab .quiz { max-width: 720px; }
+.lab-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+.lab-actions button.act { background: var(--accent); border-color: var(--accent); color: #fff; }
+.lab-actions button.act:disabled { opacity: .45; cursor: default; }
+.lab-cond { font-size: 11.5px; color: var(--muted); }
+.lab-cond b { color: var(--text-2); font-weight: 600; }
+.lab-progress { position: relative; height: 8px; background: var(--surface-2); border-radius: 4px; margin-top: 12px; max-width: 520px; }
+.lab-progress i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 4px; transition: width .12s linear; }
+.lab-progress span { position: absolute; right: 0; top: 12px; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.lab-result { margin-top: 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+.lab-result h3 { font-size: 13px; margin: 0 0 8px; }
+.lab-observe { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 16px; align-items: start; }
+.lab-observe img { width: 190px; height: 190px; border-radius: 8px; border: 1px solid var(--border); }
+.lab-observe ul { margin: 0 0 10px; padding-left: 18px; display: grid; gap: 4px; }
+.lab-observe li { font-size: 13px; line-height: 1.7; color: var(--text-2); }
+.lab-stats { display: flex; gap: 18px; flex-wrap: wrap; margin: 0; }
+.lab-stats dt { font-size: 11px; color: var(--muted); }
+.lab-stats dd { margin: 0; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* ---- 保存した実験と A/B 比較 ---- */
+.lab-sub { font-size: 12px; margin: 16px 0 8px; color: var(--text-2); border-top: 1px solid var(--border); padding-top: 12px; }
+.run-list { display: flex; gap: 10px; flex-wrap: wrap; }
+.run {
+  position: relative; display: grid; gap: 2px; justify-items: start; padding: 8px; width: 132px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px; text-align: left;
+}
+.run.on { border-color: var(--accent); background: color-mix(in oklab, var(--accent) 8%, var(--surface)); }
+.run img { width: 114px; height: 114px; border-radius: 6px; }
+.run b { font-size: 11.5px; font-weight: 600; line-height: 1.4; }
+.run span { font-size: 10.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.run-del {
+  position: absolute; top: 4px; right: 5px; font-style: normal; font-size: 13px; line-height: 1;
+  color: var(--muted); padding: 2px 4px; border-radius: 4px;
+}
+.run-del:hover { background: var(--surface-2); color: var(--text); }
+.cmp { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 520px; margin: 12px 0; }
+.cmp figure { margin: 0; }
+.cmp img { width: 100%; border-radius: 8px; border: 1px solid var(--border); }
+.cmp figcaption { font-size: 11.5px; color: var(--text-2); margin-top: 4px; }
+.cmp-table { border-collapse: collapse; font-size: 12.5px; max-width: 520px; width: 100%; }
+.cmp-table th { text-align: left; font-size: 11px; color: var(--muted); font-weight: 600; padding: 5px 8px; border-bottom: 1px solid var(--border); }
+.cmp-table td { padding: 5px 8px; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+.cmp-table tr.diff td { background: color-mix(in oklab, var(--accent) 10%, transparent); font-weight: 600; }
+.cmp-note { display: grid; gap: 8px; margin-top: 12px; max-width: 640px; }
+.cmp-note label { font-size: 12.5px; color: var(--text-2); display: grid; gap: 4px; }
+@media (max-width: 760px) {
+  .lab-observe { grid-template-columns: 1fr; }
+  .lab-observe img { width: 100%; height: auto; max-width: 240px; }
+  .cmp { grid-template-columns: 1fr; }
+}

@@ -38,7 +38,7 @@
       <section>
         <h2>学習</h2>
         <label class="field">学習率 <output id="lrOut"></output>
-          <input type="range" id="lr" min="0" max="5" step="1" />
+          <input type="range" id="lr" min="0" max="6" step="1" />
         </label>
         <label class="field">バッチサイズ
           <select id="batch"><option>32</option><option>64</option><option>128</option></select>
@@ -51,7 +51,7 @@
       <section>
         <h2>ネットワーク <span class="hint">変更するとリセット</span></h2>
         <label class="field">埋め込み次元 d
-          <select id="d"><option>16</option><option>32</option><option>48</option></select>
+          <select id="d"><option>4</option><option>8</option><option>16</option><option>32</option><option>48</option></select>
         </label>
         <label class="field">ヘッド数
           <select id="heads"><option>1</option><option>2</option><option>4</option></select>

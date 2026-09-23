@@ -86,6 +86,9 @@ ai-learning-lab/
 │       ├── formula.js         生きた数式
 │       ├── drills.js          ドリルの問題（毎回生成）
 │       ├── quiz.js            予想クイズ
+│       ├── lab.js             実験カードと A/B 比較の UI
+│       ├── experiments.js     実験カードの内容（テーマ・予想・条件・観察）
+│       ├── runs.js            実験の記録（localStorage）
 │       ├── goals.js           各ページの学習目標・所要時間・つまずき
 │       ├── explain.js         自分の言葉で説明する欄
 │       ├── progress.js        進捗と間隔反復（localStorage）

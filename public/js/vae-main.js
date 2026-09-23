@@ -8,6 +8,8 @@ import { History, initialDataset, syncDataset, fillDatasetSelect, mountHeader, m
 import { LiveFormula } from './formula.js';
 import { codeBox } from './codebox.js';
 import { VAE_CODE } from './code-snippets.js';
+import { mountLab, thumb } from './lab.js';
+import { EXPERIMENTS } from './experiments.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -186,17 +188,34 @@ function updatePick() {
 
 function train(steps) {
   const t0 = performance.now();
+  let done = 0;
   for (let i = 0; i < steps; i++) {
     const r = vae.trainStep();
     hist.push({ step: r.step, recon: r.recon, klw: state.cfg.beta * r.kl });
     state.rateSteps++;
+    done++;
     if (performance.now() - t0 > 20) break;
   }
+  return done;
 }
 
 function loop() {
   const now = performance.now();
-  if (state.running) {
+  if (state.job) {
+    const j = state.job;
+    j.done += train(80);
+    j.onProgress(Math.min(j.done, j.total));
+    if (now - state.densityT > DENSITY_INTERVAL) refreshDensity();
+    render();
+    updatePick();
+    if (j.done >= j.total) {
+      state.job = null;
+      setRunning(false);
+      refreshDensity(true);
+      render();
+      j.onDone();
+    }
+  } else if (state.running) {
     train(state.speed);
     if (now - state.densityT > DENSITY_INTERVAL) refreshDensity();
     render();
@@ -310,12 +329,54 @@ function init() {
     '.controls section:nth-child(2) .field:nth-child(4)': ['sx'],
   });
 
+  mountExperimentLab();
   codeBox($('vaeCode'), { items: VAE_CODE });
   enableGlossary();
   reset();
   setRunning(false);
   render();
   requestAnimationFrame(loop);
+}
+
+// ---- 実験カード ----
+function mountExperimentLab() {
+  const el = document.createElement('section');
+  const goal = document.querySelector('.goal') || document.querySelector('header.top');
+  goal.insertAdjacentElement('afterend', el);
+
+  const setUI = (cfg) => {
+    if (cfg.beta != null) { $('beta').value = BETAS.indexOf(cfg.beta); $('betaOut').textContent = String(cfg.beta); }
+    if (cfg.sigmaX != null) { $('sigma').value = SIGMAS.indexOf(cfg.sigmaX); $('sigmaOut').textContent = String(cfg.sigmaX); }
+    if (cfg.latentDim != null) $('latentDim').value = String(cfg.latentDim);
+    if (cfg.hidden != null) $('hidden').value = String(cfg.hidden);
+    if (cfg.depth != null) { $('depth').value = cfg.depth; $('depthOut').textContent = String(cfg.depth); }
+  };
+
+  mountLab(el, {
+    pageId: 'vae',
+    experiments: EXPERIMENTS.vae,
+    apply(cfg) {
+      Object.assign(state.cfg, cfg);
+      setUI(cfg);
+      reset();
+      setRunning(false);
+    },
+    run(steps, cb) { state.job = { total: steps, done: 0, onProgress: cb.onProgress, onDone: cb.onDone }; },
+    stop() { state.job = null; setRunning(false); },
+    capture() {
+      return {
+        img: thumb($('main')),
+        step: vae.step,
+        config: { beta: state.cfg.beta, latentDim: state.cfg.latentDim, hidden: state.cfg.hidden,
+                  depth: state.cfg.depth, sigmaX: state.cfg.sigmaX, dataset: state.cfg.dataset },
+        stats: [
+          { k: '復元のズレ', v: vae.last ? vae.last.mse.toFixed(3) : '–' },
+          { k: 'KL', v: vae.last ? vae.last.kl.toFixed(3) : '–' },
+          { k: 'β × KL', v: vae.last ? (state.cfg.beta * vae.last.kl).toFixed(3) : '–' },
+        ],
+      };
+    },
+  });
 }
 
 init();
