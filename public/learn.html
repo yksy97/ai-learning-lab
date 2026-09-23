@@ -32,6 +32,11 @@
         <p class="note">思い出せたら間隔が伸び（1日 → 3日 → 7日 → 16日 → 35日）、あやしければ翌日また出ます。</p>
       </div>
       <div class="panel">
+        <h2>自分の言葉で説明する <span class="hint" id="exCount"></span></h2>
+        <div class="gl-body" id="exStatus"></div>
+        <p class="note">読んで分かった気になっていても、書こうとすると詰まります。詰まったところが、まだ分かっていないところです。</p>
+      </div>
+      <div class="panel">
         <h2>使い方のコツ</h2>
         <div class="gl-body">
           <p>1回で完璧に理解しようとしないこと。<b>触る → 少し分かる → 用語カードを読む → また触る</b>の往復が効きます。</p>
@@ -47,10 +52,28 @@
     import { PATH, PATH_LAYERS } from './js/curriculum.js';
     import { TERM_BY_ID } from './js/glossary.js';
     import { mountHeader, enableGlossary } from './js/common.js';
-    import { getProgress, setDone, dueTerms, reviewed, reviewCount, resetAll } from './js/progress.js';
+    import { getProgress, setDone, dueTerms, reviewed, reviewCount, resetAll, getExplain } from './js/progress.js';
 
     mountHeader({ id: 'learn', mode: 'detail', sub: '第0層（数学の道具）から実用まで。進捗と復習をこのブラウザに記録する' });
     const $ = (id) => document.getElementById(id);
+
+    const EXPLAINS = [
+      { id: 'gan', label: 'GAN', h: 'gan-guide.html' },
+      { id: 'vae', label: 'VAE', h: 'vae-guide.html' },
+      { id: 'rag', label: 'RAG', h: 'rag-guide.html' },
+    ];
+
+    function renderExplainStatus() {
+      let written = 0;
+      $('exStatus').innerHTML = EXPLAINS.map((e) => {
+        const d = getExplain(e.id);
+        const len = (d && d.text ? d.text.trim().length : 0);
+        if (len >= 60) written++;
+        const state = len >= 60 ? `書いた（${len} 文字）` : len > 0 ? `書きかけ（${len} 文字）` : 'まだ';
+        return `<div class="ex-row"><a href="${e.h}#explain">${e.label}</a><span>${state}</span></div>`;
+      }).join('');
+      $('exCount').textContent = `${written} / ${EXPLAINS.length}`;
+    }
 
     function renderPath() {
       const p = getProgress();
@@ -85,7 +108,7 @@
       renderPath();
       renderReview();
     });
-    $('reset').addEventListener('click', () => { resetAll(); renderPath(); renderReview(); });
+    $('reset').addEventListener('click', () => { resetAll(); renderPath(); renderReview(); renderExplainStatus(); });
 
     let card = null;
     function renderReview() {
@@ -117,6 +140,7 @@
 
     renderPath();
     renderReview();
+    renderExplainStatus();
     enableGlossary(['.hero', '.gl-body', '.path-item']);
   </script>
 </body>

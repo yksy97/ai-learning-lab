@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ML Visualizer · 第0層の道具</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='6' width='20' height='20' rx='3' fill='%23199e70'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="top"><div id="nav"></div></header>
+
+  <main class="home">
+    <section class="panel hero">
+      <h2 class="hero-title">式が読めないのは、たいてい「道具」を知らないから</h2>
+      <p>GAN も VAE も Transformer も RAG も、式に出てくる道具はほとんど同じ4つです。
+        log、確率の掛け算、交差エントロピー、内積。ここでは意味を説明する代わりに、
+        つまみを動かして数字が動くところを見てもらいます。<b>先に手で触っておくと、各モデルの式が「知っている道具の組み合わせ」に見えてきます。</b></p>
+    </section>
+
+    <!-- 道具1 -->
+    <section class="panel tool">
+      <h2>道具1 &nbsp;log は「どれくらい驚いたか」の目盛り</h2>
+      <div class="tool-grid">
+        <div class="canvas-wrap tool-canvas"><canvas id="cLog"></canvas></div>
+        <div class="tool-body">
+          <label class="field">起きた出来事の確率 p<output id="logPv">0.50</output>
+            <input type="range" id="logP" min="0.01" max="1" step="0.01" value="0.5" />
+          </label>
+          <div class="readout">
+            <div><span>−log p（驚きの大きさ）</span><b id="logOut">0.693</b></div>
+            <div><span>コイン投げ何回分</span><b id="logBits">1.0</b></div>
+          </div>
+          <p class="note" id="logEx"></p>
+          <p>めったに起きないことほど、起きたときの情報は大きい。これを数にしたのが <b>−log p</b> です。
+            確率が 1 なら 0（当たり前のことを知っても得るものはない）、確率が小さいほど急に大きくなります。
+            掛け算が足し算になるという性質のおかげで、確率をつないでいく計算がすべて足し算で書けるようになります。</p>
+          <p class="bridge"><b>どこで使うか：</b>Transformer の損失（<a href="ar.html">NLL</a>）は、
+            正解のトークンに置いた確率の −log。VAE の再構成項も、GAN の損失も、中身はこの目盛りです。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 道具2 -->
+    <section class="panel tool">
+      <h2>道具2 &nbsp;確率の掛け算は、log にすると足し算になる</h2>
+      <div class="tool-grid">
+        <div class="canvas-wrap tool-canvas tall"><canvas id="cChain"></canvas></div>
+        <div class="tool-body">
+          <label class="field">1回あたりの確率 p<output id="chainPv">0.30</output>
+            <input type="range" id="chainP" min="0.02" max="0.98" step="0.01" value="0.3" />
+          </label>
+          <label class="field">つないだ回数 n<output id="chainNv">40</output>
+            <input type="range" id="chainN" min="1" max="400" step="1" value="40" />
+          </label>
+          <div class="readout">
+            <div><span>掛け算した値 pⁿ</span><b id="chainMul">–</b></div>
+            <div><span>log を足した値 n·log p</span><b id="chainSum">–</b></div>
+            <div class="wide"><span>だいたいの大きさ</span><b id="chainBack">–</b></div>
+          </div>
+          <p class="note" id="chainWarn" hidden>いま pⁿ は計算機の中で <b>0</b> になりました。数としては 0 ではないのに、
+            桁が足りずに消えています。これがあるので、実装ではいつも log のまま扱います。</p>
+          <p>上のグラフはどちらも同じ数です。ふつうの目盛りだと、あっという間に 0 に張りついて
+            「どれくらい小さいのか」が見えません。対数の目盛りにすると<b>まっすぐな直線</b>になり、
+            n が増えたぶんだけ一定の割合で小さくなっていることが読み取れます。</p>
+          <p class="bridge"><b>どこで使うか：</b><a href="ar.html">自己回帰 Transformer</a> は
+            1点の確率を p(x) = p(t₁)·p(t₂|t₁)·p(t₃|t₁t₂)… と掛け算で作ります。
+            そのままでは桁が消えるので、実際に計算しているのは log の足し算です。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 道具3 -->
+    <section class="panel tool">
+      <h2>道具3 &nbsp;softmax で確率にして、正解の驚きを損失にする</h2>
+      <div class="tool-grid narrow">
+        <div class="tool-body">
+          <p class="note">モデルの出力（ロジット）は、大きさの比べられるただの数。
+            softmax で 0〜1 に直して合計を 1 にすると、確率として読めるようになります。</p>
+          <div class="z-grid">
+            <label class="field">ねこ のロジット<output id="z0v">1.0</output>
+              <input type="range" id="z0" min="-4" max="4" step="0.1" value="1" /></label>
+            <label class="field">いぬ のロジット<output id="z1v">0.5</output>
+              <input type="range" id="z1" min="-4" max="4" step="0.1" value="0.5" /></label>
+            <label class="field">とり のロジット<output id="z2v">-0.5</output>
+              <input type="range" id="z2" min="-4" max="4" step="0.1" value="-0.5" /></label>
+          </div>
+          <div class="ce-ans-row"><span class="note">正解はどれ？</span><div class="drill-tabs" id="ceAns"></div></div>
+        </div>
+        <div class="tool-body">
+          <div class="ce-bars" id="ceBars"></div>
+          <div class="readout">
+            <div><span>正解に置いた確率</span><b id="ceP">–</b></div>
+            <div><span>損失 −log p(正解)</span><b id="ceLoss">–</b></div>
+          </div>
+          <p class="note" id="ceNote"></p>
+          <p class="bridge"><b>どこで使うか：</b>分類も言語モデルも、損失はこの形（交差エントロピー）です。
+            <a href="drills.html">ドリル</a>で手計算すると、記号が手順に変わります。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 道具4 -->
+    <section class="panel tool">
+      <h2>道具4 &nbsp;「似ている」を向きで測る — 内積とコサイン類似度</h2>
+      <div class="tool-grid">
+        <div class="canvas-wrap tool-canvas square-ish"><canvas id="cVec"></canvas></div>
+        <div class="tool-body">
+          <p class="note">矢印の先をドラッグして動かしてください。a と b が資料と質問だと思うと分かりやすいです。</p>
+          <div class="readout">
+            <div><span>内積 a·b</span><b id="vDot">–</b></div>
+            <div><span>なす角</span><b id="vDeg">–</b></div>
+            <div><span>|a|</span><b id="vLa">–</b></div>
+            <div><span>|b|</span><b id="vLb">–</b></div>
+            <div class="wide"><span>コサイン類似度 cos θ = a·b / (|a||b|)</span><b id="vCos">–</b></div>
+          </div>
+          <div class="story-actions">
+            <button id="vSame">同じ向きにする</button>
+            <button id="vOrth">直角にする</button>
+            <button id="vDouble">b を2倍に伸ばす</button>
+          </div>
+          <p class="note" id="vNote"></p>
+          <p><b>b を2倍にすると内積も2倍</b>になりますが、<b>コサイン類似度は変わりません</b>。
+            長さ（＝文書の長さや単語の多さ）に引きずられず、向き（＝何について書いてあるか）だけを見たいので、
+            検索では内積そのものではなくコサイン類似度を使います。</p>
+          <p class="bridge"><b>どこで使うか：</b><a href="rag.html">RAG</a> の検索そのもの。
+            埋め込みベクトルどうしの cos を並べて、大きい順に資料を取り出しています。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>この4つが、各モデルのどこに出てくるか</h2>
+      <table class="sym-table">
+        <thead><tr><th>道具</th><th>出てくる場所</th><th>式の中の顔</th></tr></thead>
+        <tbody>
+          <tr><td>−log p</td><td>Transformer の損失、VAE の再構成、GAN の損失</td><td>−log D(x)、−log p(t)</td></tr>
+          <tr><td>積 → log の和</td><td>自己回帰モデルの尤度、対数尤度</td><td>log p(x) = Σ log p(tᵢ | t&lt;ᵢ)</td></tr>
+          <tr><td>softmax と交差エントロピー</td><td>次トークンの予測、アテンションの重み</td><td>softmax(z)ᵢ = e^{zᵢ} / Σ e^{zⱼ}</td></tr>
+          <tr><td>内積・コサイン類似度</td><td>RAG の検索、アテンションの QKᵀ</td><td>cos θ = a·b / (|a||b|)</td></tr>
+        </tbody>
+      </table>
+      <p class="note">ここまで触ったら、<a href="learn.html">学習パス</a>の第1層に進むと、同じ道具が組み合わさっていくのが見えます。</p>
+    </section>
+  </main>
+
+  <footer class="foot">つまみを動かした結果は保存されません。何度でも壊して大丈夫です</footer>
+
+  <script type="module" src="js/math0-main.js"></script>
+</body>
+</html>

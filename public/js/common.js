@@ -73,6 +73,8 @@ export const MODELS = [
     tagline: '図書館の司書と作家。質問に関係する資料を探してから答える' },
   { id: 'compare', label: '比較', detail: 'compare.html', kind: 'まとめ',
     tagline: '同じデータを GAN・Transformer・VAE に学習させて並べる' },
+  { id: 'math0', label: '第0層の道具', detail: 'math0.html', kind: '学ぶ',
+    tagline: 'log・確率の掛け算・交差エントロピー・内積を、つまみを動かして体感する' },
   { id: 'learn', label: '学習パス', detail: 'learn.html', kind: '学ぶ',
     tagline: '第0層（数学の道具）から実用までの順路。進捗と復習を記録する' },
   { id: 'glossary', label: '用語と記号', detail: 'glossary.html', kind: '学ぶ',
@@ -113,7 +115,7 @@ export function mountHeader(opt = {}) {
  * 本文中の専門用語を自動でカードにする。
  * ガイドのように中身が差し替わるページでも効くよう、変化を見て貼り直す。
  */
-export function enableGlossary(selectors = ['.story-body', '.term', '.guide', '.hero', '.note', '.answer', '.gl-body']) {
+export function enableGlossary(selectors = ['.story-body', '.term', '.guide', '.hero', '.note', '.answer', '.gl-body', '.ex-model']) {
   const run = () => {
     for (const sel of selectors) {
       for (const el of document.querySelectorAll(sel)) {

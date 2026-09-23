@@ -507,3 +507,70 @@ textarea {
 
 .reveal { border-left: 3px solid var(--accent); padding-left: 10px; margin-top: 10px; }
 .reveal p { margin: 0; }
+
+/* ---- 第0層：道具のページ ---- */
+.tool { margin-bottom: 14px; }
+.tool h2 { font-size: 15px; color: var(--text); margin-bottom: 10px; }
+.tool-grid { display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); gap: 18px; align-items: start; }
+.tool-grid.narrow { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.tool-body p { margin: 0 0 10px; font-size: 13px; line-height: 1.85; color: var(--text-2); }
+.tool-body p:last-child { margin-bottom: 0; }
+.tool-body p b { color: var(--text); }
+.tool-body a { color: var(--accent); }
+.tool-canvas { height: 190px; }
+.tool-canvas.tall { height: 250px; }
+.tool-canvas.square-ish { height: 300px; }
+.readout {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px 14px;
+  background: var(--surface-2); border-radius: 8px; padding: 9px 12px; margin: 4px 0 10px;
+}
+.readout .wide { grid-column: 1 / -1; }
+.readout span { display: block; font-size: 11px; color: var(--muted); }
+.readout b { font-size: 16px; font-variant-numeric: tabular-nums; font-weight: 600; }
+.bridge { border-left: 3px solid var(--accent); padding-left: 10px; }
+.z-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0 14px; }
+.ce-bars { display: grid; gap: 6px; margin-bottom: 10px; }
+.ce-row { display: grid; grid-template-columns: 82px 1fr 46px; gap: 8px; align-items: center; font-size: 12px; }
+.ce-lbl { color: var(--muted); }
+.ce-row.on .ce-lbl { color: var(--text); font-weight: 600; }
+.ce-bar { height: 12px; background: var(--surface-2); border-radius: 3px; overflow: hidden; }
+.ce-bar i { display: block; height: 100%; background: var(--muted); border-radius: 3px; transition: width .12s; }
+.ce-row.on .ce-bar i { background: var(--accent); }
+.ce-val { text-align: right; font-variant-numeric: tabular-nums; color: var(--text-2); }
+.ce-ans-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ce-ans-row .drill-tabs { margin-bottom: 0; }
+.ce-ans-row .drill-tabs button { padding: 4px 10px; font-size: 12px; }
+#cVec { cursor: grab; touch-action: none; }
+#cVec:active { cursor: grabbing; }
+@media (max-width: 860px) {
+  .tool-grid, .tool-grid.narrow { grid-template-columns: 1fr; }
+  .tool-canvas.square-ish { height: 260px; }
+}
+
+/* ---- 自分の言葉で説明する ---- */
+.explain { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; background: var(--surface-2); }
+.explain h3 { font-size: 14px; margin: 0 0 4px; }
+.explain .ex-lead { font-size: 12.5px; color: var(--text-2); line-height: 1.7; margin: 0 0 8px; }
+.ex-words { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
+.ex-words i {
+  font-style: normal; font-size: 11.5px; padding: 3px 9px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--surface); color: var(--muted);
+}
+.ex-words i.used { border-color: var(--ar); color: var(--text); background: color-mix(in oklab, var(--ar) 16%, var(--surface)); }
+.explain textarea { min-height: 96px; background: var(--surface); }
+.ex-meta { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+.ex-count { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.ex-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.ex-model { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
+.ex-model h4 { font-size: 11px; color: var(--muted); margin: 0 0 4px; font-weight: 600; }
+.ex-model p { margin: 0 0 8px; font-size: 13px; line-height: 1.85; }
+.ex-model p:last-child { margin-bottom: 0; }
+.ex-check { display: grid; gap: 5px; margin-top: 8px; }
+.ex-check label { display: flex; gap: 7px; align-items: flex-start; font-size: 12.5px; color: var(--text-2); line-height: 1.6; }
+.ex-check input { margin-top: 3px; accent-color: var(--ar); }
+.ex-saved { font-size: 11px; color: var(--ar); }
+.explain-wrap { margin-top: 14px; max-width: 960px; }
+.ex-row { display: flex; justify-content: space-between; gap: 10px; font-size: 12.5px; padding: 4px 0; border-top: 1px solid var(--border); }
+.ex-row:first-child { border-top: none; }
+.ex-row a { color: var(--accent); text-decoration: none; }
+.ex-row span { color: var(--muted); }

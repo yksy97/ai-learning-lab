@@ -6,9 +6,10 @@ const INTERVALS = [1, 3, 7, 16, 35];
 
 function load() {
   try {
-    return JSON.parse(localStorage.getItem(KEY)) || { done: {}, quiz: {}, review: {} };
+    const p = JSON.parse(localStorage.getItem(KEY)) || {};
+    return { done: p.done || {}, quiz: p.quiz || {}, review: p.review || {}, explain: p.explain || {} };
   } catch {
-    return { done: {}, quiz: {}, review: {} };
+    return { done: {}, quiz: {}, review: {}, explain: {} };
   }
 }
 
@@ -90,6 +91,22 @@ export function addReviewTerms(terms) {
   save(p);
 }
 
+/** 自己説明（自分の言葉で書いた文章）の保存と読み出し */
+export function getExplain(id) {
+  return load().explain[id] || null;
+}
+
+export function saveExplain(id, data) {
+  const p = load();
+  p.explain[id] = { ...data, at: Date.now() };
+  save(p);
+}
+
+/** 書いた自己説明の数（学習パスの表示に使う） */
+export function explainCount() {
+  return Object.values(load().explain).filter((e) => (e.text || '').trim().length >= 60).length;
+}
+
 export function resetAll() {
-  save({ done: {}, quiz: {}, review: {} });
+  save({ done: {}, quiz: {}, review: {}, explain: {} });
 }
