@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Learning Lab · CNN</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='6' width='20' height='20' rx='3' fill='%23199e70'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="top"><div id="nav"></div></header>
+
+  <main class="home">
+    <section class="panel hero">
+      <h2 class="hero-title">画像を見る AI は、小さな型紙を画像じゅうで使い回しています</h2>
+      <p>16×16 の画像を、たて棒・よこ棒・ななめ・しかくの4つに分けます。
+        やることは単純で、<b>3×3 の小さな型紙（カーネル）を画像の上で少しずつずらしながら当てて、
+        どこがどれくらい反応したかを記録する</b>だけです。これが<b>畳み込み</b>です。</p>
+      <p class="note">同じ型紙を場所を変えて使い回すので、形が左上にあっても右下にあっても同じように見つかります。
+        全部の画素に別々の重みを持たせるより、はるかに少ないパラメータで済みます（このページでは 1,600 個）。</p>
+    </section>
+
+    <section class="panel">
+      <h2>材料を見る</h2>
+      <p class="note" style="margin-top:0">位置・太さ・傾き・かすれを毎回変えて作っています。同じクラスでも1枚ずつ違います。</p>
+      <div class="cnn-samples" id="samples"></div>
+    </section>
+
+    <section class="panel lab" id="trainPanel">
+      <div class="lab-head"><h2>学習させる</h2></div>
+      <p class="lab-body">学習前のカーネルはでたらめな模様です。学習すると、
+        <b>たての線に反応する型紙・よこの線に反応する型紙</b>…… というように役割が分かれていきます。</p>
+      <div class="lab-actions">
+        <button id="btnTrain" class="act">400 ステップ学習させる</button>
+        <button id="btnReset">最初から</button>
+        <span class="lab-cond">カーネル <b id="nf">6</b> 枚 ・ パラメータ <b id="params">–</b></span>
+      </div>
+      <div class="lab-progress" id="prog" hidden><i></i><span></span></div>
+      <div class="readout">
+        <div><span>学習したステップ</span><b id="stStep">0</b></div>
+        <div><span>損失</span><b id="stLoss">–</b></div>
+        <div><span>正解率（新しい80枚）</span><b id="stAcc">–</b></div>
+      </div>
+      <div class="cnn-two">
+        <div>
+          <h3 class="mini-title">学習した型紙（カーネル）</h3>
+          <div class="cnn-kernels" id="kernels"></div>
+          <p class="note">赤が「ここが明るいと反応する」、青が「ここは暗いほうがよい」。
+            たて・よこ・ななめの境目に反応する型紙が出てきます。</p>
+        </div>
+        <div>
+          <h3 class="mini-title">どこで間違えているか</h3>
+          <table class="cnn-conf" id="conf"></table>
+          <p class="note">縦が正解、横がモデルの答え。対角線に集まっていれば当たっています。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>1枚を通してみる</h2>
+      <div class="cnn-flow">
+        <div>
+          <h3 class="mini-title">入力（16×16）</h3>
+          <canvas id="inImg" class="cnn-img big"></canvas>
+          <div class="lm-presets" id="pick"></div>
+        </div>
+        <div>
+          <h3 class="mini-title">特徴マップ（型紙を当てた結果・ReLU 後）</h3>
+          <div class="cnn-maps" id="maps"></div>
+          <p class="note">明るいところが「その型紙によく合った場所」です。</p>
+        </div>
+        <div>
+          <h3 class="mini-title">プーリング後（8×8）</h3>
+          <div class="cnn-maps small" id="pools"></div>
+          <p class="note">2×2 ごとに一番強い値だけ残します。すこしズレても同じ結果になり、大きさも 1/4 になります。</p>
+        </div>
+        <div>
+          <h3 class="mini-title">答え</h3>
+          <div class="lm-bars" id="probs"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>自分で描いてみる</h2>
+      <div class="cnn-draw">
+        <div>
+          <canvas id="draw" class="cnn-img draw"></canvas>
+          <div class="lm-actions">
+            <button id="btnClear">消す</button>
+            <span class="note">ドラッグで描けます。同じ形を場所を変えて描いても、同じ答えになるか試してください。</span>
+          </div>
+        </div>
+        <div>
+          <h3 class="mini-title">いまの答え</h3>
+          <div class="lm-bars" id="drawProbs"></div>
+          <p class="note" id="drawNote">学習させてから描くと、ちゃんと答えが返ります。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>確認する</h2>
+      <div id="checks" class="st-checks"></div>
+    </section>
+
+    <section class="panel explain-wrap">
+      <h2>読んだら、自分の言葉で言い直してみる</h2>
+      <div id="explain"></div>
+    </section>
+  </main>
+
+  <footer class="foot">実際の CNN は、この「畳み込み → ReLU → プーリング」を何段も積み重ねます</footer>
+
+  <script type="module" src="js/cnn-main.js"></script>
+</body>
+</html>

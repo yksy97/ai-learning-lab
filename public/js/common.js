@@ -72,6 +72,8 @@ export const MODELS = [
     action: '実験する', tagline: '20の質問のように、1トークンずつ位置を絞り込んで作る' },
   { id: 'rag', label: 'RAG', guide: 'rag-guide.html', detail: 'rag.html', kind: 'モデルを動かして学ぶ',
     tagline: '図書館の司書と作家。質問に関係する資料を探してから答える' },
+  { id: 'cnn', label: 'CNN', detail: 'cnn.html', kind: 'モデルを動かして学ぶ',
+    action: '描いて試す', tagline: '3×3 の型紙を画像じゅうで使い回して形を見つける。自分で描いて分類させる' },
   { id: 'llm', label: '言語モデル', detail: 'llm.html', kind: 'モデルを動かして学ぶ',
     action: '次の1文字を当てる', tagline: 'LLM の心臓部。次の1文字を確率で予測し、温度で選び方を変える' },
   { id: 'structure', label: '共通のしくみ', detail: 'structure.html', kind: 'モデルを動かして学ぶ',
