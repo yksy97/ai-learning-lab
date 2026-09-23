@@ -68,6 +68,7 @@ ai-learning-lab/
 │   ├── ar.html                自己回帰 Transformer
 │   ├── rag-guide.html / rag.html
 │   ├── compare.html           比較
+│   ├── structure.html         共通のしくみ（4モデルを同じ枠で）
 │   ├── style.css              ライト / ダーク両対応
 │   └── js/
 │       ├── nn.js              MLP・逆伝播・Adam
@@ -89,6 +90,7 @@ ai-learning-lab/
 │       ├── lab.js             実験カードと A/B 比較の UI
 │       ├── experiments.js     実験カードの内容（テーマ・予想・条件・観察）
 │       ├── runs.js            実験の記録（localStorage）
+│       ├── structure.js       共通のしくみの内容（7段 × 4モデル）
 │       ├── goals.js           各ページの学習目標・所要時間・つまずき
 │       ├── explain.js         自分の言葉で説明する欄
 │       ├── progress.js        進捗と間隔反復（localStorage）

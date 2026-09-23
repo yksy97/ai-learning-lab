@@ -689,3 +689,53 @@ textarea {
   .lab-observe img { width: 100%; height: auto; max-width: 240px; }
   .cmp { grid-template-columns: 1fr; }
 }
+
+/* ---- 共通のしくみ ---- */
+.st-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+.st-head h2 { margin: 0; }
+.st-wrap { overflow-x: auto; margin: 10px 0 4px; }
+.st-table { border-collapse: collapse; width: 100%; min-width: 860px; }
+.st-table th, .st-table td { text-align: left; vertical-align: top; padding: 9px 11px; border-bottom: 1px solid var(--border); }
+.st-table thead th { font-size: 12px; font-weight: 600; color: var(--text-2); border-bottom: 1px solid var(--text-2); }
+.st-table thead th a { text-decoration: none; }
+.st-corner { width: 128px; }
+.st-stage { padding: 0 !important; }
+.st-stage button {
+  display: block; width: 100%; text-align: left; border: none; background: none;
+  padding: 9px 11px; border-radius: 0;
+}
+.st-stage button:hover { background: var(--surface-2); }
+.st-stage b { display: block; font-size: 13px; }
+.st-stage button > span { display: block; font-size: 11px; color: var(--muted); margin-top: 1px; }
+.st-table td > b { display: block; font-size: 12.5px; font-weight: 500; line-height: 1.6; }
+.st-table td b b { font-weight: 700; }
+.st-table td > span { display: block; font-size: 11px; color: var(--muted); line-height: 1.6; margin-top: 3px; }
+.st-table tr.on td, .st-table tr.on th { background: color-mix(in oklab, var(--accent) 9%, transparent); }
+.st-plain { color: var(--muted); font-style: italic; }
+.st-open { border-left: 3px solid var(--accent); padding: 2px 0 2px 12px; margin-top: 10px; }
+.st-open h3 { font-size: 13px; margin: 0 0 6px; }
+.st-open p { margin: 0 0 6px; font-size: 13px; line-height: 1.85; color: var(--text-2); }
+.st-open p:last-child { margin-bottom: 0; }
+.st-open b { color: var(--text); }
+.st-tag {
+  display: inline-block; font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 999px;
+  margin-right: 8px; vertical-align: 1px;
+}
+.st-tag.same { background: color-mix(in oklab, var(--ar) 20%, var(--surface)); color: var(--text); }
+.st-tag.diff { background: color-mix(in oklab, var(--fake) 20%, var(--surface)); color: var(--text); }
+.st-note:empty { display: none; }
+
+.flow { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 12px; align-items: center; padding: 8px 0; border-top: 1px solid var(--border); }
+.flow:first-of-type { border-top: none; }
+.flow-name { font-size: 13px; font-weight: 600; }
+.flow ol { display: flex; flex-wrap: wrap; gap: 4px 0; list-style: none; margin: 0; padding: 0; align-items: center; }
+.flow li {
+  font-size: 11.5px; color: var(--text-2); background: var(--surface-2);
+  border-radius: 6px; padding: 4px 9px;
+}
+.flow li.flow-first { background: var(--surface); border: 1px solid var(--border); }
+.flow li:not(:last-child)::after { content: '→'; color: var(--muted); margin: 0 3px 0 9px; }
+.st-checks { display: grid; gap: 10px; max-width: 760px; }
+@media (max-width: 760px) {
+  .flow { grid-template-columns: 1fr; gap: 4px; }
+}

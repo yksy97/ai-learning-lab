@@ -72,6 +72,8 @@ export const MODELS = [
     action: '実験する', tagline: '20の質問のように、1トークンずつ位置を絞り込んで作る' },
   { id: 'rag', label: 'RAG', guide: 'rag-guide.html', detail: 'rag.html', kind: 'モデルを動かして学ぶ',
     tagline: '図書館の司書と作家。質問に関係する資料を探してから答える' },
+  { id: 'structure', label: '共通のしくみ', detail: 'structure.html', kind: 'モデルを動かして学ぶ',
+    action: '骨格を見る', tagline: '4つのモデルを、入力から学習まで同じ枠に並べて見る' },
   { id: 'compare', label: '比較', detail: 'compare.html', kind: 'モデルを動かして学ぶ',
     action: '見比べる', tagline: '同じデータを3つのモデルに学習させ、得意・不得意を見比べる' },
   { id: 'math0', label: 'AIを理解する道具', detail: 'math0.html', kind: '基礎から積む',

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Learning Lab · 共通のしくみ</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='6' width='20' height='20' rx='3' fill='%23199e70'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="top"><div id="nav"></div></header>
+
+  <main class="home">
+    <section class="panel hero">
+      <h2 class="hero-title">モデルは違っても、骨格は同じです</h2>
+      <p>GAN・VAE・Transformer・RAG を、ばらばらの4つとして覚えると、次に新しいモデルが出てきたときにまた一から覚え直すことになります。
+        ここでは4つを<b>同じ枠</b>に並べます。枠は7つ ——
+        入力を受け取り、数に直し、計算し、出力し、良し悪しを測り、更新し、使う。</p>
+      <p class="note">段の名前（左の列）をクリックすると、その段で<b>共通していること</b>と<b>分かれること</b>が出ます。</p>
+    </section>
+
+    <section class="panel">
+      <div class="st-head">
+        <h2>4つを同じ枠で見る</h2>
+        <label class="check"><input type="checkbox" id="plain" /> それぞれの言葉ではなく、共通の言い方で見る</label>
+      </div>
+      <div class="st-wrap">
+        <table class="st-table" id="table"></table>
+      </div>
+      <div class="st-note" id="note"></div>
+    </section>
+
+    <section class="panel">
+      <h2>1本の流れとして見る</h2>
+      <p class="note" style="margin-top:0">同じ色の枠が、上の表の同じ段にあたります。</p>
+      <div id="flows"></div>
+    </section>
+
+    <section class="panel">
+      <h2>ここが分かれ目です</h2>
+      <div class="guide-grid">
+        <div>
+          <h3>知識をどこに置くか</h3>
+          <p>GAN・VAE・Transformer は、学んだことを<b>重みの中</b>に置きます。RAG は<b>外の資料</b>に置きます。明日新しい規程が増えるなら後者、というように、置き場所で選ぶ技術です。</p>
+        </div>
+        <div>
+          <h3>目的が1つか2つか</h3>
+          <p>損失が1つなら、下がれば良い。GAN だけは2つあって互いに逆を向くので、「下がったから良い」が言えません。学習の安定しにくさは、ここから来ています。</p>
+        </div>
+        <div>
+          <h3>確率を出せるか</h3>
+          <p>Transformer と VAE は「どれくらいありそうか」を数で言えます。GAN は言えません。評価のしやすさと、作るものの鋭さは、だいたい引き換えになります。</p>
+        </div>
+        <div>
+          <h3>1回で作るか、少しずつ作るか</h3>
+          <p>GAN と VAE は1回で全体を作ります。Transformer は1トークンずつ継ぎ足します。LLM の返事がじわじわ出てくるのは、この作り方の違いです。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>確認する</h2>
+      <div id="checks" class="st-checks"></div>
+    </section>
+
+    <section class="panel explain-wrap">
+      <h2>読んだら、自分の言葉で言い直してみる</h2>
+      <div id="explain"></div>
+    </section>
+  </main>
+
+  <footer class="foot">この表は、4つのモデルを比べるための地図です。実際の動きは各モデルのページで確かめてください</footer>
+
+  <script type="module" src="js/structure-main.js"></script>
+</body>
+</html>
