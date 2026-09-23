@@ -1,10 +1,10 @@
-// 共通のしくみ：4つのモデルを同じ枠に並べて見る。
+// 共通のしくみ：5つのモデルを同じ枠に並べて見る。
 import { MODELS, STAGES, FLOWS, CHECKS } from './structure.js';
 import { mountHeader, mountGoal, enableGlossary } from './common.js';
 import { renderQuiz } from './quiz.js';
 import { renderExplain } from './explain.js';
 
-mountHeader({ id: 'structure', mode: 'detail', sub: '4つのモデルを、入力から学習まで同じ枠に並べて見ます' });
+mountHeader({ id: 'structure', mode: 'detail', sub: '5つのモデルを、入力から学習まで同じ枠に並べて見ます' });
 mountGoal('structure');
 
 const $ = (id) => document.getElementById(id);
