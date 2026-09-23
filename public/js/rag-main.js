@@ -2,7 +2,7 @@
 import { RagIndex } from './rag.js';
 import { PRESET_QUESTIONS } from './rag-corpus.js';
 import { RagMap } from './rag-viz.js';
-import { mountHeader, enableGlossary } from './common.js';
+import { mountHeader, mountGoal, enableGlossary } from './common.js';
 import { LiveFormula } from './formula.js';
 import { codeBox } from './codebox.js';
 import { RAG_CODE } from './code-snippets.js';
@@ -11,8 +11,9 @@ const $ = (id) => document.getElementById(id);
 
 mountHeader({
   id: 'rag', mode: 'detail',
-  sub: '質問に関係する社内規程を探し、それをプロンプトに詰めてから答える（Retrieval-Augmented Generation）',
+  sub: '質問に関係する資料を探し、それをプロンプトに入れてから答えます（Retrieval-Augmented Generation）',
 });
+mountGoal('rag');
 
 const state = {
   k: 3,

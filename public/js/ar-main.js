@@ -4,14 +4,15 @@ import { DATASETS } from './datasets.js';
 import { mulberry32 } from './nn.js';
 import { LineChart } from './viz.js';
 import { ARSpaceView } from './ar-viz.js';
-import { History, initialDataset, syncDataset, fillDatasetSelect, mountHeader, enableGlossary } from './common.js';
+import { History, initialDataset, syncDataset, fillDatasetSelect, mountHeader, mountGoal, enableGlossary } from './common.js';
 import { LiveFormula } from './formula.js';
 import { codeBox } from './codebox.js';
 import { AR_CODE } from './code-snippets.js';
 
 const $ = (id) => document.getElementById(id);
 
-mountHeader({ id: 'ar', mode: 'detail', sub: '点をトークン列に変え、Transformer が「次のトークン」を1つずつ予測して p(x) を学ぶ。相手（Discriminator）はいない' });
+mountHeader({ id: 'ar', mode: 'detail', sub: '点をトークンの列に変えて、Transformer が「次の1つ」を予測することだけを繰り返します。競う相手はいません' });
+mountGoal('ar');
 const LR_STEPS = [0.0003, 0.001, 0.002, 0.003, 0.005, 0.01];
 const N_VIEW = 500;
 const TABLE_INTERVAL = 300; // 学習中に確率表を作り直す間隔（ms）

@@ -574,3 +574,26 @@ textarea {
 .ex-row:first-child { border-top: none; }
 .ex-row a { color: var(--accent); text-decoration: none; }
 .ex-row span { color: var(--muted); }
+
+/* ---- このページのゴール ---- */
+.goal {
+  display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 18px;
+  align-items: start; margin-bottom: 14px;
+}
+.goal h2 { font-size: 11px; color: var(--muted); letter-spacing: .04em; margin-bottom: 6px; }
+.goal ul { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
+.goal li { font-size: 13px; line-height: 1.7; color: var(--text); }
+.goal li::marker { color: var(--accent); }
+.goal-meta { display: grid; gap: 8px; border-left: 1px solid var(--border); padding-left: 16px; }
+.goal-meta span { display: block; font-size: 11px; color: var(--muted); }
+.goal-meta b { font-size: 15px; font-variant-numeric: tabular-nums; }
+.goal-meta a { font-size: 13px; color: var(--accent); text-decoration: none; }
+.pitfall { margin-top: 10px; }
+.pitfall summary { cursor: pointer; font-size: 12px; color: var(--text-2); }
+.pitfall summary::marker { color: var(--muted); }
+.pitfall p { margin: 6px 0 0; font-size: 12.5px; line-height: 1.8; color: var(--text-2); }
+.pitfall p b { color: var(--text); }
+@media (max-width: 760px) {
+  .goal { grid-template-columns: 1fr; }
+  .goal-meta { border-left: none; border-top: 1px solid var(--border); padding: 10px 0 0; grid-auto-flow: column; }
+}

@@ -3,14 +3,15 @@ import { RagIndex } from './rag.js';
 import { RagMap } from './rag-viz.js';
 import { renderQuiz } from './quiz.js';
 import { renderExplain } from './explain.js';
-import { mountHeader, enableGlossary } from './common.js';
+import { mountHeader, mountGoal, enableGlossary } from './common.js';
 
 const $ = (id) => document.getElementById(id);
 
 mountHeader({
   id: 'rag', mode: 'guide',
-  sub: '「質問を受けた司書が資料を探し、その資料を読んで作家が答えを書く」として、RAG のしくみを順番に見ていく',
+  sub: '「司書が資料を探し、その資料を読んで作家が答えを書く」として、RAG のしくみを順に見ていきます',
 });
+mountGoal('rag-guide');
 
 const C = {
   lib: '<span class="chip police">図書館（資料）</span>',

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ML Visualizer</title>
+  <title>AI Learning Lab</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='11' cy='16' r='7' fill='%233987e5'/%3E%3Ccircle cx='21' cy='16' r='7' fill='%23d95926' fill-opacity='.85'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -14,11 +14,12 @@
 
   <main class="home">
     <section class="panel hero">
-      <h2 class="hero-title">AI のしくみを、動かしながら理解する</h2>
-      <p>機械学習のモデルをブラウザ上でその場で学習させ、中で何が起きているかを見るためのアプリです。
-        学習も推論もすべてブラウザ内の JavaScript で計算していて、外部ライブラリもサーバも使いません。</p>
-      <p>各モデルには <b>たとえ話ガイド</b>（紙芝居のように順番に見せる）と <b>詳細</b>（自由にいじれる画面）があります。
-        はじめてのモデルは、まずガイドから見るのがおすすめです。</p>
+      <h2 class="hero-title">AI の「なぜ？」が、見えてくる。</h2>
+      <p>AI を使うだけで終わらせず、<b>動かして・予想して・壊して・自分の言葉で説明できる</b>ようになるための学習アプリです。
+        モデルはこのブラウザの中でその場で学習します。外部のサービスにもサーバにも、データは送られません。</p>
+      <p>各モデルには <b>たとえ話ガイド</b>（順を追って読む）と <b>詳細</b>（自由に設定を変えて試す）があります。
+        はじめて触るモデルは、ガイドから見てください。どこから始めればよいか迷うときは
+        <a href="learn.html">学習パス</a>を開くと、順路と進み具合が分かります。</p>
     </section>
 
     <div id="cards"></div>
@@ -27,30 +28,30 @@
       <h2>このアプリについて</h2>
       <div class="guide-grid">
         <div>
-          <h3>全部ブラウザの中</h3>
-          <p>ニューラルネットの順伝播・逆伝播・Adam、Transformer の注意機構まで手書きしている。学習は目の前で走っているので、設定を変えた結果がそのまま見える。</p>
+          <h3>目の前で学習が走ります</h3>
+          <p>順伝播・逆伝播・Adam・Transformer の注意機構まで、すべてこのページの中で計算しています。設定を変えた結果が、そのまま画面に出ます。</p>
         </div>
         <div>
-          <h3>たとえ話つき</h3>
-          <p>専門用語の前に、まず身近なたとえで全体像をつかむ。ガイドの各ステップには「専門用語では」の対応表がついている。</p>
+          <h3>たとえ話から入れます</h3>
+          <p>専門用語の前に、まず身近なたとえで全体像をつかみます。各ステップに「専門用語では」の対応表が付いているので、たとえ話のままでは終わりません。</p>
         </div>
         <div>
-          <h3>失敗も見せる</h3>
-          <p>うまくいく例だけでなく、モード崩壊・勾配消失・事後崩壊など、教科書に出てくる失敗をその場で再現できる。</p>
+          <h3>失敗も再現できます</h3>
+          <p>うまくいく例だけでは、なぜその設計なのかが分かりません。モード崩壊・勾配消失・事後崩壊など、教科書に出てくる失敗をその場で起こせます。</p>
         </div>
         <div>
-          <h3>小さく正しく</h3>
-          <p>2次元の点や小さな文書集という小さな題材にして、そのぶん中身を全部見せる。逆伝播は数値微分と一致することをテストで確認している。</p>
+          <h3>小さく、正しく</h3>
+          <p>題材は2次元の点や小さな文書集に絞り、そのぶん中身をすべて見せます。逆伝播は数値微分と一致することをテストで確認しています。</p>
         </div>
       </div>
     </section>
   </main>
 
-  <footer class="foot">すべてブラウザ内の JavaScript で計算（外部ライブラリなし）</footer>
+  <footer class="foot">計算はすべてこのブラウザの中で行われ、外部には何も送信されません</footer>
 
   <script type="module">
     import { MODELS, mountHeader, enableGlossary } from './js/common.js';
-    mountHeader({ sub: '機械学習のモデルを、動かしながら見て理解するための可視化アプリ' });
+    mountHeader({ sub: 'AI のしくみを、動かして・予想して・自分の言葉で説明できるようになるための学習アプリです' });
     enableGlossary(['.hero', '.guide']);
     const groups = [];
     for (const m of MODELS) {

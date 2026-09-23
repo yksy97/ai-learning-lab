@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ML Visualizer · 用語と記号</title>
+  <title>AI Learning Lab · 用語と記号</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='6' width='20' height='20' rx='3' fill='%233987e5'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -33,12 +33,13 @@
     </section>
   </main>
 
-  <footer class="foot">用語カードは各ページの本文からも開けます</footer>
+  <footer class="foot">用語カードは、各ページの本文中の点線つきの言葉からも開けます</footer>
 
   <script type="module">
     import { TERMS, SYMBOLS, LAYERS } from './js/glossary.js';
-    import { mountHeader, enableGlossary } from './js/common.js';
-    mountHeader({ id: 'glossary', mode: 'detail', sub: '4つのモデルに出てくる用語と記号を、意味・たとえ・記号・式の4点セットで引く' });
+    import { mountHeader, mountGoal, enableGlossary } from './js/common.js';
+    mountHeader({ id: 'glossary', mode: 'detail', sub: '用語と記号を、意味・たとえ・記号・式の4点セットで引けます' });
+mountGoal('glossary');
 
     const tagList = ['すべて', '共通', 'GAN', 'VAE', 'Transformer', 'RAG'];
     let filter = 'すべて';

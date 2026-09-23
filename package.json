@@ -1,5 +1,5 @@
 {
-  "name": "ml-visualizer",
+  "name": "ai-learning-lab",
   "version": "1.0.0",
   "description": "AI のしくみ（GAN・VAE・自己回帰 Transformer・RAG）をブラウザ上で動かしながら可視化するローカルアプリ（依存ライブラリなし）",
   "type": "module",

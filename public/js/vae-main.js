@@ -4,7 +4,7 @@ import { DATASETS } from './datasets.js';
 import { mulberry32, gaussian } from './nn.js';
 import { LineChart } from './viz.js';
 import { VAESpaceView, drawLatent } from './vae-viz.js';
-import { History, initialDataset, syncDataset, fillDatasetSelect, mountHeader, enableGlossary } from './common.js';
+import { History, initialDataset, syncDataset, fillDatasetSelect, mountHeader, mountGoal, enableGlossary } from './common.js';
 import { LiveFormula } from './formula.js';
 import { codeBox } from './codebox.js';
 import { VAE_CODE } from './code-snippets.js';
@@ -13,8 +13,9 @@ const $ = (id) => document.getElementById(id);
 
 mountHeader({
   id: 'vae', mode: 'detail',
-  sub: '本物の点をいったん「メモ（潜在変数）」にしてから描き直す。メモの置き場所が整っていく様子を見る',
+  sub: '点をいったんメモ（潜在変数）に変えてから描き直します。メモの置き場所が整っていく様子を見ます',
 });
+mountGoal('vae');
 
 const BETAS = [0, 0.1, 0.3, 1, 2, 4, 10, 50, 150];
 const SIGMAS = [0.05, 0.1, 0.2, 0.4];

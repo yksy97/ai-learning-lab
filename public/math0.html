@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ML Visualizer · 第0層の道具</title>
+  <title>AI Learning Lab · 第0層の道具</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='6' width='20' height='20' rx='3' fill='%23199e70'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -12,10 +12,12 @@
 
   <main class="home">
     <section class="panel hero">
-      <h2 class="hero-title">式が読めないのは、たいてい「道具」を知らないから</h2>
+      <h2 class="hero-title">式が読めないのは、たいてい「道具」を知らないからです</h2>
       <p>GAN も VAE も Transformer も RAG も、式に出てくる道具はほとんど同じ4つです。
         log、確率の掛け算、交差エントロピー、内積。ここでは意味を説明する代わりに、
-        つまみを動かして数字が動くところを見てもらいます。<b>先に手で触っておくと、各モデルの式が「知っている道具の組み合わせ」に見えてきます。</b></p>
+        つまみを動かして数字が動くところを見てください。
+        <b>先に手で触っておくと、各モデルの式が「知っている道具の組み合わせ」に見えてきます。</b>
+        それぞれの下に、同じ計算を Python で書いたものを添えてあります。</p>
     </section>
 
     <!-- 道具1 -->
@@ -37,6 +39,17 @@
             掛け算が足し算になるという性質のおかげで、確率をつないでいく計算がすべて足し算で書けるようになります。</p>
           <p class="bridge"><b>どこで使うか：</b>Transformer の損失（<a href="ar.html">NLL</a>）は、
             正解のトークンに置いた確率の −log。VAE の再構成項も、GAN の損失も、中身はこの目盛りです。</p>
+          <details class="codebox">
+            <summary>numpy で書くと</summary>
+            <pre class="prompt">import numpy as np
+
+p = 0.5
+surprise = -np.log(p)        # 0.693… （驚きの大きさ、単位は nat）
+bits     = -np.log2(p)       # 1.0    （コイン投げ何回分）
+
+# PyTorch の交差エントロピーも、中身はこの −log を平均しているだけ
+# loss = F.cross_entropy(logits, target)</pre>
+          </details>
         </div>
       </div>
     </section>
@@ -66,6 +79,19 @@
           <p class="bridge"><b>どこで使うか：</b><a href="ar.html">自己回帰 Transformer</a> は
             1点の確率を p(x) = p(t₁)·p(t₂|t₁)·p(t₃|t₁t₂)… と掛け算で作ります。
             そのままでは桁が消えるので、実際に計算しているのは log の足し算です。</p>
+          <details class="codebox">
+            <summary>numpy で書くと</summary>
+            <pre class="prompt">import numpy as np
+
+p, n = 0.02, 400
+
+np.power(p, n)               # 0.0  ← 桁が足りずに消える（アンダーフロー）
+n * np.log(p)                # -1564.8  ← log なら扱える
+
+# だから実装では、確率ではなく対数確率（log_prob）を足していく
+# logp = torch.log_softmax(logits, dim=-1)
+# total = logp.gather(-1, tokens.unsqueeze(-1)).sum()</pre>
+          </details>
         </div>
       </div>
     </section>
@@ -96,6 +122,18 @@
           <p class="note" id="ceNote"></p>
           <p class="bridge"><b>どこで使うか：</b>分類も言語モデルも、損失はこの形（交差エントロピー）です。
             <a href="drills.html">ドリル</a>で手計算すると、記号が手順に変わります。</p>
+          <details class="codebox">
+            <summary>numpy と PyTorch で書くと</summary>
+            <pre class="prompt">import numpy as np
+
+z = np.array([1.0, 0.5, -0.5])
+p = np.exp(z - z.max()) / np.exp(z - z.max()).sum()   # softmax
+loss = -np.log(p[0])                                   # 正解が 0 番のとき
+
+# 実務では1行
+# loss = F.cross_entropy(logits, target)
+# ※ F.cross_entropy は softmax を内側でやるので、logits をそのまま渡す</pre>
+          </details>
         </div>
       </div>
     </section>
@@ -125,6 +163,19 @@
             検索では内積そのものではなくコサイン類似度を使います。</p>
           <p class="bridge"><b>どこで使うか：</b><a href="rag.html">RAG</a> の検索そのもの。
             埋め込みベクトルどうしの cos を並べて、大きい順に資料を取り出しています。</p>
+          <details class="codebox">
+            <summary>numpy で書くと</summary>
+            <pre class="prompt">import numpy as np
+
+a = np.array([1.0, 0.35])
+b = np.array([0.45, 0.95])
+
+dot = a @ b                                  # 内積
+cos = dot / (np.linalg.norm(a) * np.linalg.norm(b))   # コサイン類似度
+
+# b を2倍にしても cos は変わらない（向きしか見ていない）
+# 検索では、正規化したベクトルどうしの内積＝コサイン類似度を使う</pre>
+          </details>
         </div>
       </div>
     </section>

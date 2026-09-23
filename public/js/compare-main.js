@@ -8,11 +8,12 @@ import { SpaceView, LineChart } from './viz.js';
 import { ARSpaceView } from './ar-viz.js';
 import { VAESpaceView } from './vae-viz.js';
 import { precisionRecall, modesCovered } from './metrics.js';
-import { History, initialDataset, syncDataset, fillDatasetSelect, mountHeader, enableGlossary } from './common.js';
+import { History, initialDataset, syncDataset, fillDatasetSelect, mountHeader, mountGoal, enableGlossary } from './common.js';
 
 const $ = (id) => document.getElementById(id);
 
-mountHeader({ id: 'compare', mode: 'detail', sub: '同じ分布を、GAN・自己回帰 Transformer・VAE に同じステップ数だけ学習させて並べる' });
+mountHeader({ id: 'compare', mode: 'detail', sub: '同じデータを、GAN・自己回帰 Transformer・VAE に同じ回数だけ学習させて並べます' });
+mountGoal('compare');
 const GAN_LR = [0.0001, 0.0003, 0.0005, 0.001, 0.002, 0.005, 0.01];
 const AR_LR = [0.0003, 0.001, 0.002, 0.003, 0.005, 0.01];
 const BETAS = [0, 0.3, 1, 2, 4, 10, 50];

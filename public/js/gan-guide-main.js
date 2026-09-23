@@ -7,11 +7,12 @@ import { modesCovered } from './metrics.js';
 import { renderQuiz } from './quiz.js';
 import { renderExplain } from './explain.js';
 
-import { mountHeader, enableGlossary } from './common.js';
+import { mountHeader, mountGoal, enableGlossary } from './common.js';
 
 const $ = (id) => document.getElementById(id);
 
-mountHeader({ id: 'gan', mode: 'guide', sub: '「偽札職人」と「警察」の2つの AI の勝負として、GAN のしくみを順番に見ていく' });
+mountHeader({ id: 'gan', mode: 'guide', sub: '「偽札職人（Generator）」と「警察（Discriminator）」の勝負として、GAN のしくみを順に見ていきます' });
+mountGoal('gan-guide');
 const N = 500;
 const DATASET = 'ring8';
 

@@ -3,14 +3,15 @@ import { GAN, DEFAULTS } from './gan.js';
 import { DATASETS } from './datasets.js';
 import { mulberry32, gaussian } from './nn.js';
 import { SpaceView, LineChart, drawLatent, zColor } from './viz.js';
-import { History, initialDataset, syncDataset, fillDatasetSelect, mountHeader, enableGlossary } from './common.js';
+import { History, initialDataset, syncDataset, fillDatasetSelect, mountHeader, mountGoal, enableGlossary } from './common.js';
 import { LiveFormula } from './formula.js';
 import { codeBox } from './codebox.js';
 import { GAN_CODE } from './code-snippets.js';
 
 const $ = (id) => document.getElementById(id);
 
-mountHeader({ id: 'gan', mode: 'detail', sub: 'Generator が「本物の分布」を真似し、Discriminator がそれを見破ろうとする攻防を 2 次元で観察する' });
+mountHeader({ id: 'gan', mode: 'detail', sub: '生成器（Generator）が本物の分布を真似し、識別器（Discriminator）が見破ろうとする攻防を観察します' });
+mountGoal('gan');
 const LR_STEPS = [0.0001, 0.0003, 0.0005, 0.001, 0.002, 0.005, 0.01];
 const N_VIEW = 500;       // 表示用サンプル数
 const GRID_MAX = 2.5;     // 潜在空間の格子の範囲

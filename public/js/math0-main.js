@@ -1,10 +1,11 @@
 // 第0層：数式に出てくる「道具」を、スライダーで動かして体感する。
 // log・確率の積と対数の和・交差エントロピー・内積とコサイン類似度の4つ。
 import { fitCanvas, cssVar } from './viz.js';
-import { mountHeader, enableGlossary } from './common.js';
+import { mountHeader, mountGoal, enableGlossary } from './common.js';
 import { addReviewTerms } from './progress.js';
 
-mountHeader({ id: 'math0', mode: 'detail', sub: '式に出てくる道具を、動かして体に入れる' });
+mountHeader({ id: 'math0', mode: 'detail', sub: '式に出てくる道具そのものを、つまみを動かして確かめます' });
+mountGoal('math0');
 
 const $ = (id) => document.getElementById(id);
 const fix = (v, n = 3) => v.toFixed(n);

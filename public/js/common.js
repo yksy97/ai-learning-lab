@@ -1,6 +1,7 @@
 // ページ共通：ナビゲーション、URL パラメータ、学習履歴
 import { DATASETS } from './datasets.js';
 import { attachGlossary } from './glossary.js';
+import { GOALS } from './goals.js';
 
 /** URL の ?dataset= を読み、なければ既定値 */
 export function initialDataset(fallback) {
@@ -104,12 +105,44 @@ export function mountHeader(opt = {}) {
       ${a(model.detail, '詳細', opt.mode === 'detail')}
     </nav>`;
   }
-  el.innerHTML = `<div class="brand"><a href="index.html">ML Visualizer</a>${model ? `<span class="crumb">${model.label}</span>` : ''}</div>
+  el.innerHTML = `<div class="brand"><a href="index.html">AI Learning Lab</a>${model ? `<span class="crumb">${model.label}</span>` : ''}</div>
     <nav class="tabs" aria-label="モデル">${tabs}</nav>
     ${sub}
     ${opt.sub ? `<p class="sub">${opt.sub}</p>` : ''}`;
 }
 
+
+/**
+ * ページの冒頭に「このページのゴール」を出す。
+ * 学習目標を先に見せると、どこに注意して読めばよいかが決まる（先行オーガナイザ）。
+ * ヘッダーの直後に差し込むので、ページ側の HTML を変えなくてよい。
+ * @param {string} id GOALS のキー
+ */
+export function mountGoal(id) {
+  const g = GOALS[id];
+  const header = document.querySelector('header.top');
+  if (!g || !header) return;
+  const el = document.createElement('section');
+  el.className = 'panel goal';
+  const links = [
+    g.prereq ? `<div><span>先に見ておくと楽</span><a href="${g.prereq.h}">${g.prereq.t}</a></div>` : '',
+    g.next ? `<div><span>このあと</span><a href="${g.next.h}">${g.next.t}</a></div>` : '',
+  ].join('');
+  el.innerHTML = `
+    <div class="goal-main">
+      <h2>このページのゴール</h2>
+      <ul>${g.goals.map((t) => `<li>${t}</li>`).join('')}</ul>
+      ${g.pitfalls ? `<details class="pitfall">
+        <summary>つまずきやすいところ（${g.pitfalls.length}）</summary>
+        ${g.pitfalls.map((t) => `<p>${t}</p>`).join('')}
+      </details>` : ''}
+    </div>
+    <div class="goal-meta">
+      <div><span>目安の時間</span><b>${g.minutes} 分</b></div>
+      ${links}
+    </div>`;
+  header.insertAdjacentElement('afterend', el);
+}
 
 /**
  * 本文中の専門用語を自動でカードにする。

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ML Visualizer · 学習パス</title>
+  <title>AI Learning Lab · 学習パス</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M6 24 L16 8 L26 24' stroke='%233987e5' stroke-width='4' fill='none'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -14,8 +14,8 @@
     <section>
       <div class="panel hero">
         <h2 class="hero-title">0 から実用までの順路</h2>
-        <p>上から順に進むのがおすすめです。各ステップには「なぜやるか」「どこを触るか」「どう確かめるか」が書いてあります。
-          チェックを付けると、そのステップの用語が復習キューに入ります。進捗はこのブラウザにだけ保存されます。</p>
+        <p>上から順に進むのがおすすめです。各ステップには「なぜやるか」「どこを触るか」「どう確かめるか」を書いてあります。
+          チェックを付けると、そのステップの用語が復習キューに入ります。記録はこのブラウザにだけ保存されます。</p>
         <div class="path-progress">
           <div class="gauge"><i id="bar"></i></div>
           <b id="pct">0%</b>
@@ -39,22 +39,23 @@
       <div class="panel">
         <h2>使い方のコツ</h2>
         <div class="gl-body">
-          <p>1回で完璧に理解しようとしないこと。<b>触る → 少し分かる → 用語カードを読む → また触る</b>の往復が効きます。</p>
-          <p>説明できるかどうかが、理解できたかどうかの判定基準です。各ステップの「確かめ方」を声に出して言ってみてください。</p>
+          <p>1回で完璧に理解しようとしないでください。<b>触る → 少し分かる → 用語カードを読む → また触る</b>の往復が効きます。</p>
+          <p>理解できたかどうかの判定基準は、説明できるかどうかです。各ステップの「確かめ方」を声に出して言ってみてください。</p>
         </div>
       </div>
     </aside>
   </main>
 
-  <footer class="foot">進捗はこのブラウザの中だけに保存されます（サーバには何も送られません）</footer>
+  <footer class="foot">記録はこのブラウザの中だけに保存されます（サーバには何も送られません）</footer>
 
   <script type="module">
     import { PATH, PATH_LAYERS } from './js/curriculum.js';
     import { TERM_BY_ID } from './js/glossary.js';
-    import { mountHeader, enableGlossary } from './js/common.js';
+    import { mountHeader, mountGoal, enableGlossary } from './js/common.js';
     import { getProgress, setDone, dueTerms, reviewed, reviewCount, resetAll, getExplain } from './js/progress.js';
 
-    mountHeader({ id: 'learn', mode: 'detail', sub: '第0層（数学の道具）から実用まで。進捗と復習をこのブラウザに記録する' });
+    mountHeader({ id: 'learn', mode: 'detail', sub: '第0層（数学の道具）から実用まで。進み具合と復習をこのブラウザに記録します' });
+mountGoal('learn');
     const $ = (id) => document.getElementById(id);
 
     const EXPLAINS = [

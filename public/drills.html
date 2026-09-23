@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ML Visualizer · ドリル</title>
+  <title>AI Learning Lab · ドリル</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='6' width='20' height='20' rx='3' fill='%23199e70'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -12,9 +12,10 @@
 
   <main class="home">
     <section class="panel hero">
-      <h2 class="hero-title">式は、1回だけ手で計算すると腑に落ちる</h2>
+      <h2 class="hero-title">式は、1回だけ手で計算すると腑に落ちます</h2>
       <p>読むだけでは式は身につきません。小さい数字で1問やると、記号の並びが「手順」に変わります。
-        数字は毎回変わるので、答えではなく手順を覚えることになります。電卓を使ってかまいません。</p>
+        数字は毎回変わるので、答えではなく手順が残ります。電卓を使ってかまいません。
+        答え合わせのあとに、同じ計算を Python で書いたものも見られます。</p>
     </section>
 
     <div class="drill-tabs" id="tabs"></div>
@@ -33,11 +34,12 @@
         </div>
         <div class="drill-result" id="result"></div>
         <div class="drill-steps" id="stepBox" hidden></div>
+        <details class="codebox" id="pyBox"><summary>Python で確かめる</summary><pre class="prompt" id="pyCode"></pre></details>
       </div>
     </section>
 
     <section class="panel">
-      <h2>この5問が効く理由</h2>
+      <h2>この5問を選んだ理由</h2>
       <div class="guide-grid">
         <div><h3>softmax</h3><p>Transformer が次を選ぶところ。アテンションの中にも出てくる。</p></div>
         <div><h3>コサイン類似度</h3><p>RAG の検索そのもの。ベクトルの「向き」を比べるという感覚がつかめる。</p></div>
@@ -47,14 +49,15 @@
     </section>
   </main>
 
-  <footer class="foot">答えは小数第2位まで。許容誤差は少し広めにしてあります</footer>
+  <footer class="foot">答えは小数第2位まで。許容誤差は少し広めにしてあります。間違えても記録は減りません</footer>
 
   <script type="module">
     import { DRILLS } from './js/drills.js';
-    import { mountHeader, enableGlossary } from './js/common.js';
+    import { mountHeader, mountGoal, enableGlossary } from './js/common.js';
     import { recordQuiz, quizStats } from './js/progress.js';
 
-    mountHeader({ id: 'drills', mode: 'detail', sub: '小さい数字で式を1回手計算する。数字は毎回変わる' });
+    mountHeader({ id: 'drills', mode: 'detail', sub: '小さい数字で、式を1回だけ手で計算します。数字は毎回変わります' });
+mountGoal('drills');
 
     let current = DRILLS[0];
     let problem = null;
@@ -81,6 +84,8 @@
       $('result').className = 'drill-result';
       $('stepBox').hidden = true;
       $('stepBox').innerHTML = problem.steps.map((s) => `<div>${s}</div>`).join('');
+      $('pyCode').textContent = problem.py || '';
+      $('pyBox').hidden = !problem.py;
       $('inputs').querySelector('input')?.focus();
     }
 

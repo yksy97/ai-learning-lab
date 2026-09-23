@@ -4,14 +4,15 @@ import { mulberry32, gaussian } from './nn.js';
 import { VAESpaceView, drawLatent } from './vae-viz.js';
 import { renderQuiz } from './quiz.js';
 import { renderExplain } from './explain.js';
-import { mountHeader, enableGlossary } from './common.js';
+import { mountHeader, mountGoal, enableGlossary } from './common.js';
 
 const $ = (id) => document.getElementById(id);
 
 mountHeader({
   id: 'vae', mode: 'guide',
-  sub: '「本物の絵を覚えて、メモだけを見て描き直す模写職人」として、VAE のしくみを順番に見ていく',
+  sub: '「絵を見てメモを取り、メモだけを見て描き直す模写職人」として、VAE のしくみを順に見ていきます',
 });
+mountGoal('vae-guide');
 
 const DATASET = 'ring8';
 const N = 400;

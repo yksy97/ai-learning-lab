@@ -25,6 +25,14 @@ export const DRILLS = [
           `確かめ：3つ足すと ${mono((sum(p)).toFixed(3))} になる（必ず 1）。`,
         ],
         formula: 'softmax(z)ᵢ = exp(zᵢ) / Σⱼ exp(zⱼ)',
+        py: `import numpy as np
+
+z = np.array([${z.join(', ')}])
+p = np.exp(z) / np.exp(z).sum()
+print(p[0])            # ${p[0].toFixed(3)}
+
+# PyTorch なら torch.softmax(z, dim=-1)
+# ※ 実装では exp する前に max を引く（桁あふれを防ぐため）`,
       };
     },
   },
@@ -48,6 +56,12 @@ export const DRILLS = [
           '向きが同じなら 1、直角なら 0。長さは効かない、というのがポイント。',
         ],
         formula: 'cos(q, d) = (q · d) / (‖q‖ ‖d‖)',
+        py: `import numpy as np
+
+q = np.array([${q.join(', ')}])
+d = np.array([${d.join(', ')}])
+cos = q @ d / (np.linalg.norm(q) * np.linalg.norm(d))
+print(cos)             # ${(dot / (nq * nd)).toFixed(3)}`,
       };
     },
   },
@@ -71,6 +85,14 @@ export const DRILLS = [
           '正解の確率が 1 なら損失は 0。0 に近づくほど損失は無限に大きくなる。',
         ],
         formula: 'L = −log p(正解)',
+        py: `import numpy as np
+
+p = np.array([${p.join(', ')}])
+loss = -np.log(p[${idx}])      # 正解は ${idx} 番目（0 から数える）
+print(loss)            # ${loss.toFixed(3)}
+
+# 実務では logits から一気に
+# loss = F.cross_entropy(logits, target)`,
       };
     },
   },
@@ -92,6 +114,14 @@ export const DRILLS = [
           'μ=0, σ=1 のとき KL = 0。事後崩壊は、この値がほぼ 0 に張り付いた状態。',
         ],
         formula: 'KL(N(μ,σ²) ‖ N(0,1)) = ½(σ² + μ² − 1 − 2 log σ)',
+        py: `import torch
+
+mu, sigma = torch.tensor(${mu}), torch.tensor(${sd})
+logvar = (sigma ** 2).log()
+kl = 0.5 * (logvar.exp() + mu ** 2 - 1 - logvar)
+print(kl.item())       # ${kl.toFixed(3)}
+
+# VAE の実装では logvar を出力させることが多い（σ > 0 を保証できる）`,
       };
     },
   },
@@ -112,6 +142,16 @@ export const DRILLS = [
           `ちなみに、見分けがつかない均衡（D = 0.5）だと ${mono('2 × log 2 = 1.386')}。画面の点線がこれ。`,
         ],
         formula: 'L_D = −log D(x) − log(1 − D(G(z)))',
+        py: `import torch
+import torch.nn.functional as F
+
+d_real = torch.tensor(${dr})
+d_fake = torch.tensor(${df})
+loss_d = -torch.log(d_real) - torch.log(1 - d_fake)
+print(loss_d.item())   # ${ld.toFixed(3)}
+
+# 実務では確率ではなくロジットを渡す（数値が安定する）
+# F.binary_cross_entropy_with_logits(logits, labels)`,
       };
     },
   },
