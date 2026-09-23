@@ -68,6 +68,7 @@ ai-learning-lab/
 │   ├── ar.html                自己回帰 Transformer
 │   ├── rag-guide.html / rag.html
 │   ├── compare.html           比較
+│   ├── llm.html               言語モデル（次の1文字と温度）
 │   ├── structure.html         共通のしくみ（4モデルを同じ枠で）
 │   ├── style.css              ライト / ダーク両対応
 │   └── js/
@@ -91,6 +92,7 @@ ai-learning-lab/
 │       ├── experiments.js     実験カードの内容（テーマ・予想・条件・観察）
 │       ├── runs.js            実験の記録（localStorage）
 │       ├── structure.js       共通のしくみの内容（7段 × 4モデル）
+│       ├── charlm.js          文字単位の言語モデル（題材・学習・温度・生成）
 │       ├── goals.js           各ページの学習目標・所要時間・つまずき
 │       ├── explain.js         自分の言葉で説明する欄
 │       ├── progress.js        進捗と間隔反復（localStorage）
@@ -103,7 +105,8 @@ ai-learning-lab/
     ├── gan.test.js            MLP の勾配チェックと GAN の収束テスト
     ├── ar.test.js             Transformer の勾配チェックと学習テスト
     ├── vae.test.js            VAE の勾配チェック・学習・事後崩壊のテスト
-    └── rag.test.js            検索の精度と地図の配置のテスト
+    ├── rag.test.js            検索の精度と地図の配置のテスト
+    └── charlm.test.js         文字単位の言語モデル（学習・文末・温度）のテスト
 ```
 
 テストは `npm test` で実行します。

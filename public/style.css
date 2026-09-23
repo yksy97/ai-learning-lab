@@ -739,3 +739,34 @@ textarea {
 @media (max-width: 760px) {
   .flow { grid-template-columns: 1fr; gap: 4px; }
 }
+
+/* ---- 言語モデル ---- */
+.lab.done .lab-body { color: var(--muted); }
+.lm-grid { display: grid; grid-template-columns: minmax(0, 360px) minmax(0, 1fr); gap: 22px; align-items: start; }
+.lm-grid input[type="text"] {
+  display: block; width: 100%; margin-top: 4px; font: inherit; font-size: 16px;
+  padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--surface-2); color: var(--text);
+}
+.lm-presets { display: flex; gap: 5px; flex-wrap: wrap; margin: -4px 0 12px; }
+.lm-presets button { font-size: 11.5px; padding: 3px 9px; border-radius: 999px; }
+.lm-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.lm-actions button.act { background: var(--accent); border-color: var(--accent); color: #fff; }
+.lm-bars { display: grid; gap: 5px; }
+.lm-row { display: grid; grid-template-columns: 92px minmax(0, 1fr) 54px; gap: 10px; align-items: center; }
+.lm-ch { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.lm-bar { position: relative; height: 16px; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
+.lm-bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; }
+.lm-bar i.raw { background: color-mix(in oklab, var(--accent) 28%, var(--surface-2)); }
+.lm-bar i.hot { background: var(--accent); height: 8px; top: 4px; }
+.lm-p { text-align: right; font-size: 12.5px; font-variant-numeric: tabular-nums; color: var(--text-2); }
+.lm-out { margin-top: 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+.lm-text { font-size: 18px; line-height: 1.8; margin: 0 0 10px; }
+.lm-trace { display: flex; flex-wrap: wrap; gap: 3px; }
+.lm-trace .tr {
+  display: grid; justify-items: center; gap: 2px; padding: 3px 5px;
+  background: var(--surface-2); border-radius: 5px;
+}
+.lm-trace .tr b { font-size: 13px; font-weight: 500; }
+.lm-trace .tr i { display: block; width: 100%; height: 3px; background: var(--accent); border-radius: 2px; }
+@media (max-width: 860px) { .lm-grid { grid-template-columns: 1fr; } }

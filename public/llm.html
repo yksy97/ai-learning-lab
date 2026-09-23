@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Learning Lab · 言語モデル</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='6' width='20' height='20' rx='3' fill='%23199e70'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="top"><div id="nav"></div></header>
+
+  <main class="home">
+    <section class="panel hero">
+      <h2 class="hero-title">LLM がやっていることは、「次の1つ」を当てることだけです</h2>
+      <p>ChatGPT のような大規模言語モデルは、文章を丸ごと考えて書いているわけではありません。
+        <b>次に来る1つを確率で予測し、1つ選んで、また次を予測する</b> —— これを繰り返しているだけです。
+        ここでは、同じ仕組みを<b>文字単位</b>の小さなモデルで動かします。</p>
+      <p class="note">このページのモデルは、44文の定型文だけを学んだ、パラメータ2万個ほどのごく小さなものです。
+        LLM そのものではありません。違うのは規模と語彙（単語かサブワードか、文字か）で、
+        <b>「次の1つを確率で予測して継ぎ足す」という心臓部は同じ</b>です。</p>
+    </section>
+
+    <section class="panel lab" id="trainPanel">
+      <div class="lab-head"><h2>まず、学習させる</h2></div>
+      <p class="lab-body">いまのモデルは、まだ何も学んでいません。右の予測は<b>でたらめ</b>です
+        （初期値のせいで、意味のない文字にそれらしい確率がついていることがあります）。
+        下のボタンを押すと、44文の定型文を材料に学習します。終わったら、続きを予測できるようになります。</p>
+      <div class="lab-actions">
+        <button id="btnTrain" class="act">この題材で学習させる（約 20 秒）</button>
+        <button id="btnStop" hidden>止める</button>
+        <span class="lab-cond">文字の種類 <b id="vocab">–</b> ・ 材料 <b>44 文</b> ・ パラメータ <b id="params">–</b></span>
+      </div>
+      <div class="lab-progress" id="prog" hidden><i></i><span></span></div>
+      <div class="readout" id="stats">
+        <div><span>学習したステップ</span><b id="stStep">0</b></div>
+        <div><span>損失（NLL）</span><b id="stNll">–</b></div>
+        <div><span>下限の目安</span><b id="stH">–</b></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>次の1文字を予測する</h2>
+      <div class="lm-grid">
+        <div>
+          <label class="field">途中まで書いてみてください
+            <input type="text" id="prompt" value="よろしくお" autocomplete="off" spellcheck="false" />
+          </label>
+          <div class="lm-presets" id="presets"></div>
+          <label class="field">温度（Temperature）<output id="tempOut">0.8</output>
+            <input type="range" id="temp" min="0.1" max="2" step="0.1" value="0.8" />
+          </label>
+          <p class="note" id="tempNote"></p>
+          <div class="lm-actions">
+            <button id="btnOne">1文字だけ足す</button>
+            <button id="btnGen" class="act">最後まで生成する</button>
+            <button id="btnClear">消す</button>
+          </div>
+        </div>
+        <div>
+          <h3 class="mini-title">次に来る文字の確率（上位8）</h3>
+          <div class="lm-bars" id="bars"></div>
+          <p class="note">薄い棒が<b>モデルが出したそのままの確率</b>、濃い棒が<b>温度をかけたあと</b>の確率です。
+            温度を下げると尖り、上げると平らになります。</p>
+        </div>
+      </div>
+      <div class="lm-out" id="out" hidden>
+        <h3 class="mini-title">生成の様子</h3>
+        <p class="lm-text" id="outText"></p>
+        <div class="lm-trace" id="trace"></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>温度で何が変わるか</h2>
+      <div class="guide-grid">
+        <div>
+          <h3>温度が低い（0.2 など）</h3>
+          <p>いちばん確率の高い文字ばかり選びます。文章は崩れませんが、<b>何度やっても同じ答え</b>になります。事実を答えさせたいときはこちら。</p>
+        </div>
+        <div>
+          <h3>温度がふつう（0.7〜1.0）</h3>
+          <p>モデルが出した確率どおりに選びます。毎回すこし違う答えになり、自然な幅が出ます。多くの製品の初期値がこのあたりです。</p>
+        </div>
+        <div>
+          <h3>温度が高い（1.5 以上）</h3>
+          <p>低い確率の文字も選ばれます。意外な表現が出る代わりに、<b>途中で崩れます</b>。このページでも、文の途中で終わったり、知らない言い回しが出たりします。</p>
+        </div>
+        <div>
+          <h3>式で書くと</h3>
+          <p>温度 T は、softmax の前に確率の対数を T で割るだけです。<span class="mono">p′ᵢ ∝ exp(log pᵢ / T)</span>。T → 0 で一番高いものだけになり、T が大きいほど全部が同じ確率に近づきます。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>確認する</h2>
+      <div id="checks" class="st-checks"></div>
+    </section>
+
+    <section class="panel explain-wrap">
+      <h2>読んだら、自分の言葉で言い直してみる</h2>
+      <div id="explain"></div>
+    </section>
+  </main>
+
+  <footer class="foot">学習も生成もこのブラウザの中です。外部の言語モデルは使っていません</footer>
+
+  <script type="module" src="js/llm-main.js"></script>
+</body>
+</html>
