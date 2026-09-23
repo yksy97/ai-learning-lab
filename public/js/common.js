@@ -64,24 +64,24 @@ export class History {
 // ページ共通のヘッダー（アプリ名・モデルのタブ・ガイド / 詳細の切り替え）
 // ---------------------------------------------------------------------------
 export const MODELS = [
-  { id: 'gan', label: 'GAN', guide: 'gan-guide.html', detail: 'gan.html', kind: '生成モデル',
+  { id: 'gan', label: 'GAN', guide: 'gan-guide.html', detail: 'gan.html', kind: 'モデルを動かして学ぶ',
     tagline: '偽札職人と警察の勝負として学ぶ、敵対的生成ネットワーク' },
-  { id: 'vae', label: 'VAE', guide: 'vae-guide.html', detail: 'vae.html', kind: '生成モデル',
+  { id: 'vae', label: 'VAE', guide: 'vae-guide.html', detail: 'vae.html', kind: 'モデルを動かして学ぶ',
     tagline: '記憶して描き直す模写職人。潜在空間が整っていく様子を見る' },
-  { id: 'ar', label: '自己回帰 Transformer', detail: 'ar.html', kind: '生成モデル',
-    tagline: '20の質問のように、1トークンずつ位置を絞り込んで作る' },
-  { id: 'rag', label: 'RAG', guide: 'rag-guide.html', detail: 'rag.html', kind: '検索と生成',
+  { id: 'ar', label: '自己回帰 Transformer', detail: 'ar.html', kind: 'モデルを動かして学ぶ',
+    action: '実験する', tagline: '20の質問のように、1トークンずつ位置を絞り込んで作る' },
+  { id: 'rag', label: 'RAG', guide: 'rag-guide.html', detail: 'rag.html', kind: 'モデルを動かして学ぶ',
     tagline: '図書館の司書と作家。質問に関係する資料を探してから答える' },
-  { id: 'compare', label: '比較', detail: 'compare.html', kind: 'まとめ',
-    tagline: '同じデータを GAN・Transformer・VAE に学習させて並べる' },
-  { id: 'math0', label: '第0層の道具', detail: 'math0.html', kind: '学ぶ',
-    tagline: 'log・確率の掛け算・交差エントロピー・内積を、つまみを動かして体感する' },
-  { id: 'learn', label: '学習パス', detail: 'learn.html', kind: '学ぶ',
-    tagline: '第0層（数学の道具）から実用までの順路。進捗と復習を記録する' },
-  { id: 'glossary', label: '用語と記号', detail: 'glossary.html', kind: '学ぶ',
-    tagline: '用語を「意味・たとえ・記号・式」で引く。記号の読み方も' },
-  { id: 'drills', label: 'ドリル', detail: 'drills.html', kind: '学ぶ',
-    tagline: 'softmax・コサイン類似度・交差エントロピー・KL を小さい数字で手計算する' },
+  { id: 'compare', label: '比較', detail: 'compare.html', kind: 'モデルを動かして学ぶ',
+    action: '見比べる', tagline: '同じデータを3つのモデルに学習させ、得意・不得意を見比べる' },
+  { id: 'math0', label: 'AIを理解する道具', detail: 'math0.html', kind: '基礎から積む',
+    action: '道具を触る', tagline: '確率・log・softmax・ベクトル。AI の式に出てくる道具を、つまみを動かして確かめる' },
+  { id: 'learn', label: '学習パス', detail: 'learn.html', kind: '確かめる・調べる',
+    action: '順路を見る', tagline: 'どこから始めて、次に何をするか。進み具合と復習を記録する' },
+  { id: 'glossary', label: '用語と記号', detail: 'glossary.html', kind: '確かめる・調べる',
+    action: '調べる', tagline: '分からない言葉を調べる。意味・たとえ・記号・式の4点セットで引ける' },
+  { id: 'drills', label: 'ドリル', detail: 'drills.html', kind: '確かめる・調べる',
+    action: '手を動かす', tagline: '理解を確認する。softmax・コサイン類似度・交差エントロピー・KL を手で計算する' },
 ];
 
 /**
@@ -101,8 +101,8 @@ export function mountHeader(opt = {}) {
   if (model && model.guide && model.detail) {
     const a = (href, label, on) => `<a href="${href}"${on ? ' aria-current="page"' : ''}>${label}</a>`;
     sub = `<nav class="subtabs" aria-label="表示の種類">
-      ${a(model.guide, 'たとえ話ガイド', opt.mode === 'guide')}
-      ${a(model.detail, '詳細', opt.mode === 'detail')}
+      ${a(model.guide, 'しくみを知る', opt.mode === 'guide')}
+      ${a(model.detail, '実験する', opt.mode === 'detail')}
     </nav>`;
   }
   el.innerHTML = `<div class="brand"><a href="index.html">AI Learning Lab</a>${model ? `<span class="crumb">${model.label}</span>` : ''}</div>

@@ -12,14 +12,14 @@ export const PATH = [
   {
     id: 'l0-vector', layer: 0, title: 'ベクトルと内積、コサイン類似度',
     why: '「似ている」を数で表す方法。RAG も埋め込みも、ここが分かれば半分は分かる。',
-    links: [{ t: '第0層の道具：内積とコサイン', h: 'math0.html' }, { t: 'ドリル：コサイン類似度', h: 'drills.html' }, { t: 'RAG の地図を触る', h: 'rag.html' }],
+    links: [{ t: 'AIを理解する道具：内積とコサイン', h: 'math0.html' }, { t: 'ドリル：コサイン類似度', h: 'drills.html' }, { t: 'RAG の地図を触る', h: 'rag.html' }],
     check: '長さの違う2つのベクトルでも、向きが同じなら cos = 1 になる理由を説明できる。',
     terms: ['vector', 'dot', 'cosine'],
   },
   {
     id: 'l0-prob', layer: 0, title: '確率分布・期待値・対数',
     why: '生成モデルの式は、ほぼ全部この3つの組み合わせでできている。',
-    links: [{ t: '第0層の道具：log と確率の掛け算', h: 'math0.html' }, { t: '用語辞典の第0層', h: 'glossary.html' }, { t: 'ドリル：交差エントロピー', h: 'drills.html' }],
+    links: [{ t: 'AIを理解する道具：log と確率の掛け算', h: 'math0.html' }, { t: '用語辞典の第0層', h: 'glossary.html' }, { t: 'ドリル：交差エントロピー', h: 'drills.html' }],
     check: '「確率の掛け算が log で足し算になる」ことを式で書ける。',
     terms: ['prob', 'expect', 'log', 'gaussian'],
   },
@@ -48,7 +48,7 @@ export const PATH = [
   {
     id: 'l1-softmax', layer: 1, title: 'softmax と交差エントロピー',
     why: '分類も言語モデルも、出力はこの2つ。実務で最初に書くコードもここ。',
-    links: [{ t: '第0層の道具：softmax と交差エントロピー', h: 'math0.html' }, { t: 'ドリル：softmax', h: 'drills.html' }, { t: 'Transformer の生成パネル', h: 'ar.html' }],
+    links: [{ t: 'AIを理解する道具：softmax と交差エントロピー', h: 'math0.html' }, { t: 'ドリル：softmax', h: 'drills.html' }, { t: 'Transformer の生成パネル', h: 'ar.html' }],
     check: 'softmax の出力を足すと必ず 1 になる理由を説明できる。',
     terms: ['softmax', 'ce', 'nll'],
   },

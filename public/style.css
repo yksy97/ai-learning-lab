@@ -597,3 +597,31 @@ textarea {
   .goal { grid-template-columns: 1fr; }
   .goal-meta { border-left: none; border-top: 1px solid var(--border); padding: 10px 0 0; grid-auto-flow: column; }
 }
+
+/* ---- 学習の流れ ---- */
+.loop { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 12px 0 0; padding: 0; }
+.loop li {
+  font-size: 12px; color: var(--text-2); background: var(--surface-2);
+  border-radius: 999px; padding: 4px 12px; position: relative;
+}
+.loop li:not(:last-child)::after { content: '→'; color: var(--muted); margin-left: 12px; position: absolute; }
+.loop li:not(:last-child) { padding-right: 26px; }
+
+/* ---- まずはここから ---- */
+.start {
+  display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; align-items: center;
+  margin-bottom: 18px; border-color: var(--accent);
+  background: linear-gradient(180deg, color-mix(in oklab, var(--accent) 7%, var(--surface)), var(--surface));
+}
+.start-k { font-size: 11px; color: var(--accent); font-weight: 700; letter-spacing: .06em; }
+.start-title { font-size: 18px; margin: 4px 0 8px; color: var(--text); }
+.start-body p { margin: 0; font-size: 13.5px; line-height: 1.85; color: var(--text-2); max-width: 62ch; }
+.start-cta { display: grid; gap: 6px; justify-items: stretch; }
+.start-btn {
+  display: block; text-align: center; text-decoration: none; font-size: 14px; font-weight: 600;
+  background: var(--accent); color: #fff; border-radius: 10px; padding: 12px 18px;
+}
+.start-btn:hover { filter: brightness(1.08); }
+.start-cta .note { text-align: center; margin: 0; }
+.start-sub { text-align: center; font-size: 12px; color: var(--accent); text-decoration: none; margin-top: 4px; }
+@media (max-width: 760px) { .start { grid-template-columns: 1fr; } }

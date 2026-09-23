@@ -15,11 +15,25 @@
   <main class="home">
     <section class="panel hero">
       <h2 class="hero-title">AI の「なぜ？」が、見えてくる。</h2>
-      <p>AI を使うだけで終わらせず、<b>動かして・予想して・壊して・自分の言葉で説明できる</b>ようになるための学習アプリです。
-        モデルはこのブラウザの中でその場で学習します。外部のサービスにもサーバにも、データは送られません。</p>
-      <p>各モデルには <b>たとえ話ガイド</b>（順を追って読む）と <b>詳細</b>（自由に設定を変えて試す）があります。
-        はじめて触るモデルは、ガイドから見てください。どこから始めればよいか迷うときは
-        <a href="learn.html">学習パス</a>を開くと、順路と進み具合が分かります。</p>
+      <p>AI を使うだけで終わらせず、<b>動かして、予想して、壊して、説明する。</b><br>
+        AI の仕組みを、実験しながら理解する学習アプリです。</p>
+      <ol class="loop" aria-label="学習の流れ">
+        <li>知る</li><li>予想する</li><li>実験する</li><li>観察する</li><li>説明する</li><li>比べる</li>
+      </ol>
+    </section>
+
+    <section class="panel start">
+      <div class="start-body">
+        <span class="start-k">まずはここから</span>
+        <h2 class="start-title">AI の学習が実際に起きるところを、見てみる</h2>
+        <p>2つの AI が競い合ううちに、片方がだんだん本物そっくりの偽物を作れるようになります。
+          予備知識は要りません。数式は、見たあとで構いません。</p>
+      </div>
+      <div class="start-cta">
+        <a class="start-btn" href="gan-guide.html">GAN のしくみを見る</a>
+        <span class="note">目安 15 分 ・ 読みながら手を動かします</span>
+        <a class="start-sub" href="learn.html">順路と進み具合を見る（学習パス）</a>
+      </div>
     </section>
 
     <div id="cards"></div>
@@ -51,7 +65,7 @@
 
   <script type="module">
     import { MODELS, mountHeader, enableGlossary } from './js/common.js';
-    mountHeader({ sub: 'AI のしくみを、動かして・予想して・自分の言葉で説明できるようになるための学習アプリです' });
+    mountHeader({});
     enableGlossary(['.hero', '.guide']);
     const groups = [];
     for (const m of MODELS) {
@@ -66,7 +80,7 @@
           <a class="panel card" href="${m.guide || m.detail}">
             <h3>${m.label}</h3>
             <p>${m.tagline}</p>
-            <span class="card-links">${m.guide ? '<b>たとえ話ガイド</b>' : ''}${m.guide && m.detail ? ' ・ ' : ''}${m.detail ? '詳細' : ''}</span>
+            <span class="card-links">${m.guide ? '<b>しくみを知る</b>' : ''}${m.guide && m.detail ? ' → ' : ''}${m.detail ? (m.action || '実験する') : ''}</span>
           </a>`).join('')}
       </div>`).join('');
   </script>

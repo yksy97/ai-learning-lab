@@ -160,7 +160,7 @@ function loop() {
 
 function setRunning(v) {
   state.running = v;
-  $('btnPlay').textContent = v ? '❚❚ 一時停止' : gan.step ? `▶ 再開（${gan.step.toLocaleString()} ステップ）` : '▶ 学習開始';
+  $('btnPlay').textContent = v ? '❚❚ 止める' : gan.step ? `▶ 続きから（${gan.step.toLocaleString()} ステップ）` : '▶ 3つ同時に学習する';
   if (!v && gan) { refreshAR(); refreshGAN(true); refreshVAE(true); measure(); render(); }
 }
 

@@ -258,7 +258,7 @@ function loop() {
 
 function setRunning(v) {
   state.running = v;
-  $('btnPlay').textContent = v ? '❚❚ 一時停止' : model.step ? '▶ 再開' : '▶ 学習開始';
+  $('btnPlay').textContent = v ? '❚❚ 止める' : model.step ? '▶ 続きから学習' : '▶ この条件で学習する';
   if (!v && model.stale) refreshTables();
 }
 

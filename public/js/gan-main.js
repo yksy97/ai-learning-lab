@@ -196,7 +196,7 @@ function loop() {
 // ---- 操作パネル ----
 function setRunning(v) {
   state.running = v;
-  $('btnPlay').textContent = v ? '❚❚ 一時停止' : gan.step ? '▶ 再開' : '▶ 学習開始';
+  $('btnPlay').textContent = v ? '❚❚ 止める' : gan.step ? '▶ 続きから学習' : '▶ この条件で学習する';
 }
 
 function bindRange(id, outId, get, set, fmt = String) {

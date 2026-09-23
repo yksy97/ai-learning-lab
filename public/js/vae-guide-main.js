@@ -186,7 +186,8 @@ const STEPS = [
     latent: true, play: true, autoplay: true,
     body: `<p>ちょうどよい β では、「復元できる」と「メモ帳が整っている」の両方が成り立ち、新しい絵を作れるようになります。</p>
       <p><b>GAN との違い：</b>GAN の職人は本物を見られず、警察の反応だけを頼りにしました。VAE の職人は本物を見られる代わりに、メモという細い管を通さなければいけません。だから GAN はくっきり、VAE はぼやける、という差が出ます。</p>
-      <div class="links"><a href="vae.html">詳細タブで自由に動かす →</a><a href="gan-guide.html">GAN のガイドと見比べる →</a></div>`,
+      <p><b>では、実際にどうなるでしょうか。</b>β を 0 にしたら？ 150 まで上げたら？ ここから先は、自分で条件を決めて確かめる番です。</p>
+      <div class="links"><a href="vae.html">予想して実験する（VAE を動かす）→</a><a href="gan-guide.html">GAN のしくみと見比べる →</a></div>`,
     term: `<table>
       <tr><td>模写職人（メモを取る人）</td><td>エンコーダ q(z|x)</td></tr>
       <tr><td>模写職人（描き直す人）</td><td>デコーダ p(x|z)</td></tr>

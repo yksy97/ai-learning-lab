@@ -219,7 +219,9 @@ const STEPS = [
     play: true, autoplay: true,
     body: `<p>最後に、うまくいく設定でもう一度動かしています。たとえ話と専門用語の対応を振り返っておきましょう。</p>
       <p><b>たとえ話の限界：</b>実際の警察（D）は本物のお札も見て学んでいます。本物を知らないのは職人（G）だけです。この「知っている側」と「知らない側」の非対称さが、GAN の本質です。</p>
-      <div class="links"><a href="index.html?dataset=ring8">GAN タブで詳しく見る →</a><a href="ar.html?dataset=ring8">別の作り方（自己回帰）を見る →</a></div>`,
+      <p><b>では、実際にどうなるでしょうか。</b>学習率を10倍にしたら？ 警察を強くしたら？
+        ここから先は、自分で条件を決めて確かめる番です。</p>
+      <div class="links"><a href="gan.html?dataset=ring8">予想して実験する（GAN を動かす）→</a><a href="ar.html?dataset=ring8">別の作り方（自己回帰）を見る →</a></div>`,
     term: `<table>
       <tr><td>偽札職人</td><td>Generator（G・生成器）</td></tr>
       <tr><td>警察</td><td>Discriminator（D・識別器）</td></tr>

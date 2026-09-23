@@ -212,7 +212,7 @@ function loop() {
 
 function setRunning(v) {
   state.running = v;
-  $('btnPlay').textContent = v ? '❚❚ 一時停止' : vae.step ? '▶ 再開' : '▶ 学習開始';
+  $('btnPlay').textContent = v ? '❚❚ 止める' : vae.step ? '▶ 続きから学習' : '▶ この条件で学習する';
   if (!v) { refreshDensity(); render(); }
 }
 
